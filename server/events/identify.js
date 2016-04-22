@@ -10,7 +10,6 @@ const TOP_LEVEL_FIELDS = [
   'contact_email',
   'image',
   'picture',
-  'phone',
   'address',
   'created_at'
 ];
@@ -44,15 +43,15 @@ function updateUser(hull, user) {
       client = hull.as(hullAs);
     } else if (anonymousId) {
       properties._bid = anonymousId;
+      properties.contact_email = properties.email;
+      delete properties.email;
     }
 
     if (process.env.DEBUG) {
       console.warn('[identify]', JSON.stringify({ userId, anonymousId, properties, traits }));
     }
 
-    return client.put('me', properties).then((hullUser) => {
-      return updateTraits(hull, hullUser.id, traits);
-    });
+    return client.put('me', Object.assign({}, properties, { traits }));
   } catch (err) {
     return Promise.reject(err);
   }
