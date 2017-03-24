@@ -1,14 +1,13 @@
 /* eslint global-require: 0 */
+import Hull from "hull";
+import express from "express";
+
+import server from "./server";
 
 if (process.env.NEW_RELIC_LICENSE_KEY) {
   console.warn("Starting newrelic agent with key: ", process.env.NEW_RELIC_LICENSE_KEY);
   require("newrelic");
 }
-
-const Hull = require("hull");
-const Server = require("./server");
-
-const PORT = process.env.PORT || 8082;
 
 if (process.env.LOG_LEVEL) {
   Hull.logger.transports.console.level = process.env.LOG_LEVEL;
@@ -17,6 +16,7 @@ if (process.env.LOG_LEVEL) {
 const options = {
   Hull,
   hostSecret: process.env.SECRET || "1234",
+  port: process.env.PORT || 8082,
   devMode: process.env.NODE_ENV === "development",
   onMetric: function onMetric(metric, value, ctx) {
     console.log(`[${ctx.id}] segment.${metric}`, value);
@@ -50,21 +50,6 @@ if (process.env.LIBRATO_TOKEN && process.env.LIBRATO_USER) {
   };
 }
 
-const app = Server(options);
+const app = express();
 
-function exitNow() {
-  console.warn("Exiting now !");
-  process.exit();
-}
-
-function handleExit() {
-  console.log("Exiting... waiting 30 seconds workers to flush");
-  setTimeout(exitNow, 30000);
-  app.exit().then(exitNow);
-}
-
-process.on("SIGINT", handleExit);
-process.on("SIGTERM", handleExit);
-
-console.log(`Listening on port ${PORT}`);
-app.listen(PORT);
+server(app, options);
