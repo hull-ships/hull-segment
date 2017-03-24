@@ -20,5 +20,5 @@ export default function scope(hull, user = {} /* , context = {}*/) {
     as.guest_id = anonymousId;
   }
 
-  return hull.as(as);
+  return hull.asUser(as);
 }

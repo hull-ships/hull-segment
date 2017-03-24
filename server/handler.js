@@ -1,6 +1,5 @@
 import connect from "connect";
 import _ from "lodash";
-import rawBody from "raw-body";
 
 function noop() {}
 
@@ -20,6 +19,7 @@ function authTokenMiddleware(req, res, next) {
       try {
         const token = new Buffer(token64, "base64").toString().split(":")[0].trim();
         req.hull.token = token;
+        req.hull.config = false;
       } catch (err) {
         const e = new Error("Invalid Basic Auth Header");
         e.status = 401;
@@ -35,26 +35,20 @@ function authTokenMiddleware(req, res, next) {
 */
 function parseRequest(req, res, next) {
   req.segment = req.segment || {};
-  rawBody(req, true, (err, body) => {
-    if (err) {
-      const e = new Error("Invalid Body");
-      e.status = 400;
-      return next(e);
-    }
-    try {
-      req.segment.body = body;
-      req.segment.message = JSON.parse(body);
-      return next();
-    } catch (parseError) {
-      const e = new Error("Invalid Body");
-      e.status = 400;
-      return next(e);
-    }
-  });
+
+  req.segment.body = req.body;
+  req.segment.message = req.body;
+  return next();
 }
 
 function processHandlers(handlers, { Hull, onMetric }) {
   return function processMiddleware(req, res, next) {
+    if (!req.hull || !req.hull.client || !req.hull.ship) {
+      const e = new Error("Missing Credentials");
+      e.status = 400;
+      return next(e);
+    }
+
     try {
       const { client: hull, ship } = req.hull;
       const { message } = req.segment;
@@ -108,7 +102,7 @@ function processHandlers(handlers, { Hull, onMetric }) {
 
 module.exports = function SegmentHandler(options = {}) {
   const app = connect();
-  const { Hull, hullClient, handlers = [], hostSecret = "", onMetric = noop } = options;
+  const { Hull, connector, handlers = [], onMetric = noop } = options;
 
   const _handlers = {};
   const _flushers = [];
@@ -125,7 +119,7 @@ module.exports = function SegmentHandler(options = {}) {
 
   app.use(parseRequest); // parse segment request, early return if invalid.
   app.use(authTokenMiddleware); // retreives Hull config and stores it in the right place.
-  app.use(hullClient({ hostSecret, fetchShip: true, cacheShip: true })); // builds hull Client
+  app.use(connector.clientMiddleware());
   app.use(processHandlers(_handlers, { Hull, onMetric }));
   app.use((req, res) => {
     res.json({ message: "thanks" });

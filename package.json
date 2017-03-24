@@ -30,7 +30,7 @@
     "start": "node ./lib",
     "start:dev": "./node_modules/.bin/nodemon -w server --exec ./node_modules/.bin/babel-node -- server",
     "test": "npm run test:units && npm run test:modules",
-    "test:lint": "./node_modules/.bin/eslint server",
+    "test:lint": "eslint server",
     "test:modules": "npm outdated --depth=0",
     "test:units": "NODE_ENV=test ./node_modules/.bin/mocha -R spec ./tests/index",
     "update": "./node_modules/.bin/updtr",
