@@ -1,12 +1,5 @@
 import _ from "lodash";
 
-// function camelize(str) {
-//   return str.replace (/(?:^|[-_])(\w)/g, function (_, c, i) {
-//     var s = i == 0 ? c : c.toUpperCase();
-//     return c ? s : "";
-//   });
-// };
-
 export default function updateUserFactory(analyticsClient) {
   return function updateUser({ message = {} }, { ship = {}, hull = {} }) {
     const { user = {}, segments = [], events = [] } = message;
@@ -114,7 +107,7 @@ export default function updateUserFactory(analyticsClient) {
           return true;
         }
         if (send_events && send_events.length && !_.includes(send_events, e.event)) {
-          hull.logger.debug("event.skip.list", { message: "not included in event list" });
+          hull.logger.debug("event.skip.list", { message: "not included in event list", event: e.event });
           return true;
         }
 
@@ -157,7 +150,7 @@ export default function updateUserFactory(analyticsClient) {
             properties
           };
           hull.logger.debug("send.screen", track);
-          analytics.enqueue('screen', track);
+          analytics.enqueue("screen", track);
         } else {
           track = { ...track, event, category };
           hull.logger.debug(`send.${type}`);

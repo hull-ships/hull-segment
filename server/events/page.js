@@ -4,17 +4,14 @@ export default function handlePage(payload = {}, context = {}) {
   const { ship = {} } = context;
   const { handle_pages } = ship.settings || {};
   if (!handle_pages) { return false; }
-  const { path, search, title } = payload.properties || {};
+
+  const { properties } = payload;
+  properties.name = payload.name;
 
   const page = {
     ...payload,
-    event: "page",
-    properties: {
-      path,
-      search,
-      title,
-      name: payload.name
-    }
+    properties,
+    event: "page"
   };
 
   return track(page, context);
