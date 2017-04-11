@@ -9,15 +9,24 @@ export default function scope(hull, user = {} /* , context = {}*/) {
 
   if (hullId || userId) {
     if (hullId) { as.id = hullId; }
-    if (userId) { as.external_id = userId; }
+    // If we have a userId
+    if (userId) {
+      // and it starts with 'auth0'
+      if (userId.indexOf("auth0") === 0) {
+        // then use it as our External ID
+        as.external_id = userId;
+      } else {
+        // else drop it in the AnonymousId field
+        as.guest_id = userId;
+      }
+    } else if (anonymousId) {
+      // fallback to anonymousId because we don't have a UserId
+      as.guest_id = anonymousId;
+    }
   }
 
   if (traits.email && EMAIL_REGEXP.test(traits.email)) {
     as.email = traits.email.toLowerCase();
-  }
-
-  if (anonymousId) {
-    as.guest_id = anonymousId;
   }
 
   return hull.as(as);
