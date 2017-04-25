@@ -110,6 +110,13 @@
       "description" : "Handle group attributes as user traits, prefixed with 'group/'",
       "type" : "boolean",
       "default" : false
+    },
+    {
+      "name" : "handle_accounts",
+      "title" : "Handle Accounts",
+      "description" : "Handle group attributes as account traits",
+      "type" : "boolean",
+      "default" : false
     }
   ],
   "resources": [],
