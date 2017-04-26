@@ -11,7 +11,8 @@ export default function updateUserFactory(analyticsClient) {
 
     // Configure Analytics.js with write key
     // Ignore if write_key is not present
-    const { write_key, handle_groups, public_id_field } = ship.settings || {};
+    const { write_key, handle_groups, handle_accounts, public_id_field } = ship.settings || {};
+
     if (!write_key) {
       hull.logger.info("No write_key for ship");
       return false;
@@ -80,7 +81,7 @@ export default function updateUserFactory(analyticsClient) {
     };
 
     // Add group if available
-    if (handle_groups && groupId && userId) {
+    if ((handle_groups || handle_accounts) && groupId && userId) {
       context.groupId = groupId;
       const groupTraits = _.reduce(user, (group, value, key) => {
         const mk = key.match(/^traits_group\/(.*)/);
