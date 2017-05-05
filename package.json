@@ -28,10 +28,10 @@
     "clean": "./node_modules/.bin/rimraf dist; ./node_modules/.bin/rimraf lib",
     "start": "node ./lib",
     "start:dev": "./node_modules/.bin/nodemon -w server --exec ./node_modules/.bin/babel-node -- server",
-    "test": "npm run test:units && npm run test:modules",
+    "test": "npm run test:lint && npm run test:units && npm run test:modules",
     "test:lint": "eslint server",
     "test:modules": "npm outdated --depth=0",
-    "test:units": "NODE_ENV=test ./node_modules/.bin/mocha -R spec ./tests/index",
+    "test:units": "PORT=8082 NODE_ENV=test ./node_modules/.bin/mocha -R spec ./tests/index",
     "update": "./node_modules/.bin/updtr",
     "watch": "./node_modules/.bin/watch 'clear && npm run test:lint -s && npm run test:units -s && npm run build:client -s' server src",
     "postinstall": "npm run build"
