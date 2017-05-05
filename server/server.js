@@ -1,6 +1,7 @@
 import jwt from "jwt-simple";
 import Promise from "bluebird";
-import { notifHandler } from "hull/lib/utils";
+import { notifHandler, requireHullMiddleware } from "hull/lib/utils";
+import Hull from "hull";
 
 import devMode from "./dev-mode";
 import SegmentHandler from "./handler";
@@ -10,12 +11,8 @@ import analyticsClientFactory from "./analytics-client";
 import updateUser from "./update-user";
 
 
-module.exports = function server(app, options = {}) {
-  const { Hull, hostSecret, port, onMetric, clientConfig = {} } = options;
-
-  const connector = new Hull.Connector({ hostSecret, port, clientConfig });
-
-  connector.setupApp(app);
+module.exports = function Server(options = {}) {
+  const { app, connector, onMetric } = options;
 
   if (options.devMode) {
     app.use(devMode());
@@ -23,7 +20,7 @@ module.exports = function server(app, options = {}) {
 
   app.get("/admin.html", connector.clientMiddleware(), (req, res) => {
     const { config } = req.hull;
-    const apiKey = jwt.encode(config, hostSecret);
+    const apiKey = jwt.encode(config, connector.hostSecret);
     res.render("admin.html", { apiKey });
   });
 
@@ -82,8 +79,6 @@ module.exports = function server(app, options = {}) {
   });
 
   app.exit = () => segment.exit();
-
-  connector.startApp(app);
 
   return app;
 };

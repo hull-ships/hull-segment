@@ -2,27 +2,20 @@
 import Hull from "hull";
 import express from "express";
 
-import server from "./server";
+const { PORT = 8082, SECRET = "123", LOG_LEVEL, NODE_ENV = "development" } = process.env;
+
+let onMetric = function onMetric(metric, value, ctx) {
+  console.log(`[${ctx.id}] segment.${metric}`, value);
+};
 
 if (process.env.NEW_RELIC_LICENSE_KEY) {
   console.warn("Starting newrelic agent with key: ", process.env.NEW_RELIC_LICENSE_KEY);
   require("newrelic");
 }
 
-if (process.env.LOG_LEVEL) {
+if (LOG_LEVEL) {
   Hull.logger.transports.console.level = process.env.LOG_LEVEL;
 }
-
-const options = {
-  Hull,
-  hostSecret: process.env.SECRET || "1234",
-  port: process.env.PORT || 8082,
-  devMode: process.env.NODE_ENV === "development",
-  onMetric: function onMetric(metric, value, ctx) {
-    console.log(`[${ctx.id}] segment.${metric}`, value);
-  }
-};
-
 
 if (process.env.LIBRATO_TOKEN && process.env.LIBRATO_USER) {
   const librato = require("librato-node");
@@ -39,7 +32,7 @@ if (process.env.LIBRATO_TOKEN && process.env.LIBRATO_USER) {
   });
   librato.start();
 
-  options.onMetric = function onMetricProduction(metric = "", value = 1, ctx = {}) {
+  onMetric = function onMetricProduction(metric = "", value = 1, ctx = {}) {
     try {
       if (librato) {
         librato.measure(`segment.${metric}`, value, Object.assign({}, { source: ctx.id }));
@@ -51,5 +44,11 @@ if (process.env.LIBRATO_TOKEN && process.env.LIBRATO_USER) {
 }
 
 const app = express();
+const connector = new Hull.Connector({ port: PORT, hostSecret: SECRET });
 
-server(app, options);
+export default {
+  connector,
+  app,
+  onMetric,
+  devMode: NODE_ENV
+};
