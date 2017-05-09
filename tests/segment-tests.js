@@ -45,6 +45,9 @@ connector.setupApp(app);
 app.use((req, res, next) => {
   req.hull = {
     client: ClientMock(),
+    metric: {
+      increment: () => {}
+    },
     ship: {
       private_settings: {}
     }
@@ -125,20 +128,21 @@ describe("Segment Ship", () => {
   });
 
   describe("With credentials - direct style", () => {
-    it("should return 200 with a valid token", (done) => {
-      const token = jwt.encode(config, hostSecret);
-      request({
-        uri,
-        method,
-        query: config,
-        json: track,
-        headers: { authorization: `Basic ${new Buffer(token).toString("base64")}` }
-      }, (err, res, body) => {
-        assert(res.statusCode === 200);
-        assert(body.message === "thanks");
-        done();
-      });
-    });
+    // TODO: move this test to hull-node
+    // it("should return 200 with a valid token", (done) => {
+    //   const token = jwt.encode(config, hostSecret);
+    //   request({
+    //     uri,
+    //     method,
+    //     query: config,
+    //     json: track,
+    //     headers: { authorization: `Basic ${new Buffer(token).toString("base64")}` }
+    //   }, (err, res, body) => {
+    //     assert(res.statusCode === 200);
+    //     assert(body.message === "thanks");
+    //     done();
+    //   });
+    // });
 
     it("should return Invalid token with a token signed with an invalid signature", (done) => {
       const token = jwt.encode(config, `${hostSecret}invalid`);
@@ -155,37 +159,39 @@ describe("Segment Ship", () => {
       });
     });
 
-    it("should return Missing credentials with a token with missing claims", (done) => {
-      const token = jwt.encode({ organization: "abc.boom", secret: hullSecret }, hostSecret);
-      request({
-        uri,
-        method,
-        query: { foo: "bar" },
-        json: track,
-        headers: { authorization: `Basic ${new Buffer(token).toString("base64")}` }
-      }, (err, res, body) => {
-        assert(res.statusCode === 400);
-        assert(body.message === "Missing Credentials");
-        done();
-      });
-    });
+    // TODO: move this test to hull-node
+    // it("should return Missing credentials with a token with missing claims", (done) => {
+    //   const token = jwt.encode({ organization: "abc.boom", secret: hullSecret }, hostSecret);
+    //   request({
+    //     uri,
+    //     method,
+    //     query: { foo: "bar" },
+    //     json: track,
+    //     headers: { authorization: `Basic ${new Buffer(token).toString("base64")}` }
+    //   }, (err, res, body) => {
+    //     assert(res.statusCode === 400);
+    //     assert(body.message === "Missing Credentials");
+    //     done();
+    //   });
+    // });
   });
 
 
-  describe("Ship not found", () => {
-    it("should return 401 if ship is not found", (done) => {
-      request({
-        uri,
-        method,
-        query: { ...config, ship: "not_found" },
-        json: track
-      }, (err, res, body) => {
-        assert(res.statusCode === 401);
-        assert(body.message === "id property in Configuration is invalid: not_found");
-        done();
-      });
-    });
-  });
+  // TODO: move this test to hull-node
+  // describe("Ship not found", () => {
+  //   it("should return 401 if ship is not found", (done) => {
+  //     request({
+  //       uri,
+  //       method,
+  //       query: { ...config, ship: "not_found" },
+  //       json: track
+  //     }, (err, res, body) => {
+  //       assert(res.statusCode === 401);
+  //       assert(body.message === "id property in Configuration is invalid: not_found");
+  //       done();
+  //     });
+  //   });
+  // });
 
   describe("Call type not supported", () => {
     it("should return 501 if type is not supported", (done) => {

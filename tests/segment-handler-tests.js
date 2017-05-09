@@ -3,13 +3,10 @@ import sinon from "sinon";
 import assert from "assert";
 import _ from "lodash";
 
-import ClientMock from "./mocks/client-mock";
-
 import segmentHandler from "../server/handler";
 
 const defaultHandlerConfig = {
   onError: () => {},
-  onMetric: () => {},
   connector: {
     clientMiddleware: () => {
       return (req, res, next) => {
@@ -38,7 +35,6 @@ const defaultResStub = {
 };
 
 describe("Segment Handler", () => {
-
   it("should handle missing credentials with error response", done => {
     const segment = segmentHandler(defaultHandlerConfig);
     sinon.spy(defaultResStub, "status");
@@ -65,7 +61,7 @@ describe("Segment Handler", () => {
     }, defaultHandlerConfig);
     const reqStub = _.defaults({
       headers: {
-        authorization: `Basic ${new Buffer(` example.   `).toString("base64")}`
+        authorization: `Basic ${new Buffer(" example.   ").toString("base64")}`
       }
     }, defaultReqStub);
     const segment = segmentHandler(handlerConfig);
