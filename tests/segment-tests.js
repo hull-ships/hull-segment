@@ -107,18 +107,6 @@ describe("Segment Ship", () => {
         done();
       });
     });
-
-    it("Missing credentials", done => {
-      request({
-        uri,
-        method,
-        json: track
-      }, (err, res, body) => {
-        assert(res.statusCode === 400);
-        assert(body.message === "Missing Credentials");
-        done();
-      });
-    });
   });
 
   describe("With credentials - webhook style", () => {
@@ -145,21 +133,6 @@ describe("Segment Ship", () => {
         query: config,
         json: track,
         headers: { authorization: `Basic ${new Buffer(token).toString("base64")}` }
-      }, (err, res, body) => {
-        assert(res.statusCode === 200);
-        assert(body.message === "thanks");
-        done();
-      });
-    });
-
-    it("should trim the token when passed with extra spaces", (done) => {
-      const token = jwt.encode(config, hostSecret);
-      request({
-        uri,
-        method,
-        query: config,
-        json: track,
-        headers: { authorization: `Basic ${new Buffer(` ${token} `).toString("base64")}` }
       }, (err, res, body) => {
         assert(res.statusCode === 200);
         assert(body.message === "thanks");
