@@ -41,7 +41,7 @@ function parseRequest(req, res, next) {
   return next();
 }
 
-function processHandlers(handlers, { Hull, onMetric }) {
+function processHandlers(handlers, { Hull }) {
   return function processMiddleware(req, res, next) {
     if (!req.hull || !req.hull.client || !req.hull.ship) {
       const e = new Error("Missing Credentials");
@@ -53,10 +53,6 @@ function processHandlers(handlers, { Hull, onMetric }) {
       const { client: hull, ship } = req.hull;
       const { message } = req.segment;
 
-      const metric = (metricName, value) => {
-        return onMetric(metricName, value, ship || {});
-      };
-
       const eventName = message.type;
       const eventHandlers = handlers[eventName];
 
@@ -66,7 +62,7 @@ function processHandlers(handlers, { Hull, onMetric }) {
         Hull.logger.debug("message", JSON.stringify(message));
       }
 
-      metric(`request.${eventName}`, 1);
+      req.hull.metric.increment(`request.${eventName}`);
 
       if (eventHandlers && eventHandlers.length > 0) {
         if (message && message.integrations && message.integrations.Hull === false) {
@@ -80,7 +76,7 @@ function processHandlers(handlers, { Hull, onMetric }) {
         });
 
 
-        const processors = eventHandlers.map(fn => fn(message, { ship, hull, metric }));
+        const processors = eventHandlers.map(fn => fn(message, { ship, hull }));
 
         Promise.all(processors).then(() => {
           next();

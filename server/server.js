@@ -12,13 +12,13 @@ import updateUser from "./update-user";
 
 
 module.exports = function Server(options = {}) {
-  const { app, connector, onMetric } = options;
+  const { app, connector } = options;
 
   if (options.devMode) {
     app.use(devMode());
   }
 
-  app.get("/admin.html", connector.clientMiddleware(), (req, res) => {
+  app.get("/admin.html", (req, res) => {
     const { config } = req.hull;
     const apiKey = jwt.encode(config, connector.hostSecret);
     res.render("admin.html", { apiKey });
@@ -52,7 +52,6 @@ module.exports = function Server(options = {}) {
     onError(err) {
       console.warn("Error handling segment event", err, err && err.stack);
     },
-    onMetric,
     connector,
     Hull,
     handlers,
