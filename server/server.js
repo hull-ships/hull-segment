@@ -1,6 +1,6 @@
 import jwt from "jwt-simple";
 import Promise from "bluebird";
-import { notifHandler, requireHullMiddleware } from "hull/lib/utils";
+import { notifHandler } from "hull/lib/utils";
 import Hull from "hull";
 
 import devMode from "./dev-mode";
