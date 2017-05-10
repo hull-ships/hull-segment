@@ -102,7 +102,7 @@ function processHandlers(handlers, { Hull, onMetric }) {
 
 module.exports = function SegmentHandler(options = {}) {
   const app = connect();
-  const { Hull, connector, handlers = [], onMetric = noop } = options;
+  const { Hull, clientMiddleware, handlers = [], onMetric = noop } = options;
 
   const _handlers = {};
   const _flushers = [];
@@ -119,7 +119,7 @@ module.exports = function SegmentHandler(options = {}) {
 
   app.use(parseRequest); // parse segment request, early return if invalid.
   app.use(authTokenMiddleware); // retreives Hull config and stores it in the right place.
-  app.use(connector.clientMiddleware());
+  app.use(clientMiddleware);
   app.use(processHandlers(_handlers, { Hull, onMetric }));
   app.use((req, res) => {
     res.json({ message: "thanks" });

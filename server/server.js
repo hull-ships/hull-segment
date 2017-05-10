@@ -11,17 +11,13 @@ import updateUser from "./update-user";
 
 
 module.exports = function server(app, options = {}) {
-  const { Hull, hostSecret, port, onMetric, clientConfig = {} } = options;
-
-  const connector = new Hull.Connector({ hostSecret, port, clientConfig });
-
-  connector.setupApp(app);
+  const { Hull, hostSecret, onMetric, clientMiddleware } = options;
 
   if (options.devMode) {
     app.use(devMode());
   }
 
-  app.get("/admin.html", connector.clientMiddleware(), (req, res) => {
+  app.get("/admin.html", clientMiddleware, (req, res) => {
     const { config } = req.hull;
     const apiKey = jwt.encode(config, hostSecret);
     const encoded = new Buffer(apiKey).toString("base64");
@@ -60,7 +56,7 @@ module.exports = function server(app, options = {}) {
       console.warn("Error handling segment event", err, err && err.stack);
     },
     onMetric,
-    connector,
+    clientMiddleware,
     Hull,
     handlers,
   });
@@ -86,8 +82,6 @@ module.exports = function server(app, options = {}) {
   });
 
   app.exit = () => segment.exit();
-
-  connector.startApp(app);
 
   return app;
 };

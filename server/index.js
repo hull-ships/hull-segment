@@ -53,5 +53,14 @@ if (process.env.LIBRATO_TOKEN && process.env.LIBRATO_USER) {
 }
 
 const app = express();
+const connector = new Hull.Connector({
+  hostSecret: options.hostSecret,
+  port: options.port
+});
+options.clientMiddleware = connector.clientMiddleware();
+
+connector.setupApp(app);
 
 server(app, options);
+
+connector.startApp(app);
