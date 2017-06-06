@@ -73,7 +73,7 @@ export default function updateUserFactory(analyticsClient) {
       synchronized_segments.length > 0 && // Should we move to "Send no one by default ?"
       !_.intersection(segment_ids, synchronized_segments).length
       ) {
-      hull.logger.info("outgoing.user.skip", { ...loggingProperties, reason: "not matching any segment", segment_ids, traitsq });
+      hull.logger.info("outgoing.user.skip", { ...loggingProperties, reason: "not matching any segment", segment_ids, traits });
       return false;
     }
 
