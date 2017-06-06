@@ -18,6 +18,14 @@ export default function updateUserFactory(analyticsClient) {
 
     const loggingProperties = _.pick(user, "id", "email", "external_id");
 
+    // Custom properties to be synchronized
+    const {
+      synchronized_properties = [],
+      synchronized_segments = [],
+      forward_events = false,
+      send_events = []
+    } = ship.private_settings || {};
+
     // Build traits that will be sent to Segment
     // Use hull_segments by default
     const traits = { hull_segments: _.map(segments, "name") };
@@ -59,13 +67,6 @@ export default function updateUserFactory(analyticsClient) {
       return false;
     }
 
-    // Custom properties to be synchronized
-    const {
-      synchronized_properties = [],
-      synchronized_segments = [],
-      forward_events = false,
-      send_events = []
-    } = ship.private_settings || {};
     const segment_ids = _.map(segments, "id");
     if (
       !ignoreFilters &&
