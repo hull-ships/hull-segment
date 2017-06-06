@@ -18,11 +18,21 @@ export default function updateUserFactory(analyticsClient) {
 
     const loggingProperties = _.pick(user, "id", "email", "external_id");
 
+    // Build traits that will be sent to Segment
+    // Use hull_segments by default
+    const traits = { hull_segments: _.map(segments, "name") };
+    if (synchronized_properties.length > 0) {
+      synchronized_properties.map((prop) => {
+        traits[prop.replace(/^traits_/, "").replace("/", "_")] = user[prop];
+        return true;
+      });
+    }
+
     // Configure Analytics.js with write key
     // Ignore if write_key is not present
     const { write_key, handle_groups, public_id_field } = ship.settings || {};
     if (!write_key) {
-      hull.logger.info("outgoing.user.skip", { ...loggingProperties, reason: "no write key" });
+      hull.logger.info("outgoing.user.skip", { ...loggingProperties, reason: "no write key", traits });
       return false;
     }
 
@@ -45,7 +55,7 @@ export default function updateUserFactory(analyticsClient) {
 
     // We have no identifier for the user, we have to skip
     if (!userId && !anonymousId) {
-      hull.logger.info("outgoing.user.skip", { ...loggingProperties, reason: "No Identifier (userId or anonymousId)" });
+      hull.logger.info("outgoing.user.skip", { ...loggingProperties, reason: "No Identifier (userId or anonymousId)", traits });
       return false;
     }
 
@@ -62,20 +72,8 @@ export default function updateUserFactory(analyticsClient) {
       synchronized_segments.length > 0 && // Should we move to "Send no one by default ?"
       !_.intersection(segment_ids, synchronized_segments).length
       ) {
-      hull.logger.info("outgoing.user.skip", { ...loggingProperties, reason: "not matching any segment", segment_ids });
+      hull.logger.info("outgoing.user.skip", { ...loggingProperties, reason: "not matching any segment", segment_ids, traitsq });
       return false;
-    }
-
-    // Build traits that will be sent to Segment
-    // Use hull_segments by default
-
-    const traits = { hull_segments: _.map(segments, "name") };
-
-    if (synchronized_properties.length > 0) {
-      synchronized_properties.map((prop) => {
-        traits[prop.replace(/^traits_/, "").replace("/", "_")] = user[prop];
-        return true;
-      });
     }
 
     const integrations = { Hull: false };
