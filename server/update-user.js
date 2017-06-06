@@ -106,7 +106,7 @@ export default function updateUserFactory(analyticsClient) {
 
     hull.logger.debug("identify.send", { userId, traits, context });
     const ret = analytics.identify({ anonymousId, userId, traits, context, integrations });
-    hull.logger.info("outgoing.user.success", { ...loggingProperties });
+    hull.logger.info("outgoing.user.success", { ...loggingProperties, traits });
 
     if (events && events.length > 0) {
       events.map(e => {
