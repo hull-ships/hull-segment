@@ -18,11 +18,29 @@ export default function updateUserFactory(analyticsClient) {
 
     const loggingProperties = _.pick(user, "id", "email", "external_id");
 
+    // Custom properties to be synchronized
+    const {
+      synchronized_properties = [],
+      synchronized_segments = [],
+      forward_events = false,
+      send_events = []
+    } = ship.private_settings || {};
+
+    // Build traits that will be sent to Segment
+    // Use hull_segments by default
+    const traits = { hull_segments: _.map(segments, "name") };
+    if (synchronized_properties.length > 0) {
+      synchronized_properties.map((prop) => {
+        traits[prop.replace(/^traits_/, "").replace("/", "_")] = user[prop];
+        return true;
+      });
+    }
+
     // Configure Analytics.js with write key
     // Ignore if write_key is not present
     const { write_key, handle_groups, public_id_field } = ship.settings || {};
     if (!write_key) {
-      hull.logger.info("outgoing.user.skip", { ...loggingProperties, reason: "no write key" });
+      hull.logger.info("outgoing.user.skip", { ...loggingProperties, reason: "no write key", traits });
       return false;
     }
 
@@ -45,37 +63,18 @@ export default function updateUserFactory(analyticsClient) {
 
     // We have no identifier for the user, we have to skip
     if (!userId && !anonymousId) {
-      hull.logger.info("outgoing.user.skip", { ...loggingProperties, reason: "No Identifier (userId or anonymousId)" });
+      hull.logger.info("outgoing.user.skip", { ...loggingProperties, reason: "No Identifier (userId or anonymousId)", traits });
       return false;
     }
 
-    // Custom properties to be synchronized
-    const {
-      synchronized_properties = [],
-      synchronized_segments = [],
-      forward_events = false,
-      send_events = []
-    } = ship.private_settings || {};
     const segment_ids = _.map(segments, "id");
     if (
       !ignoreFilters &&
       synchronized_segments.length > 0 && // Should we move to "Send no one by default ?"
       !_.intersection(segment_ids, synchronized_segments).length
       ) {
-      hull.logger.info("outgoing.user.skip", { ...loggingProperties, reason: "not matching any segment", segment_ids });
+      hull.logger.info("outgoing.user.skip", { ...loggingProperties, reason: "not matching any segment", segment_ids, traits });
       return false;
-    }
-
-    // Build traits that will be sent to Segment
-    // Use hull_segments by default
-
-    const traits = { hull_segments: _.map(segments, "name") };
-
-    if (synchronized_properties.length > 0) {
-      synchronized_properties.map((prop) => {
-        traits[prop.replace(/^traits_/, "").replace("/", "_")] = user[prop];
-        return true;
-      });
     }
 
     const integrations = { Hull: false };
@@ -106,7 +105,7 @@ export default function updateUserFactory(analyticsClient) {
 
     hull.logger.debug("identify.send", { userId, traits, context });
     const ret = analytics.identify({ anonymousId, userId, traits, context, integrations });
-    hull.logger.info("outgoing.user.success", { ...loggingProperties });
+    hull.logger.info("outgoing.user.success", { ...loggingProperties, traits });
 
     if (events && events.length > 0) {
       events.map(e => {
