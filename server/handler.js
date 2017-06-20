@@ -65,9 +65,9 @@ function processHandlers(handlers, { Hull, onMetric }) {
       const eventHandlers = handlers[eventName];
 
       if (hull) {
-        hull.logger.debug(`${eventName}.start`, { message });
+        hull.logger.debug(`incoming.${eventName}.start`, { message });
       } else {
-        Hull.logger.debug(`${eventName}.start`, { message });
+        Hull.logger.debug(`incoming.${eventName}.start`, { message });
       }
 
       metric(`request.${eventName}`, 1);
@@ -77,7 +77,7 @@ function processHandlers(handlers, { Hull, onMetric }) {
           return next();
         }
 
-        Object.keys(message).map(k => {
+        Object.keys(message).map((k) => {
           const camelK = camelize(k);
           message[camelK] = message[camelK] || message[k];
           return k;
@@ -158,7 +158,7 @@ module.exports = function SegmentHandler(options = {}) {
   }
 
   handler.exit = () => {
-    return Promise.all(_flushers.map((fn) => fn()));
+    return Promise.all(_flushers.map(fn => fn()));
   };
 
   return handler;

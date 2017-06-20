@@ -103,12 +103,11 @@ export default function updateUserFactory(analyticsClient) {
     }
 
 
-    hull.logger.debug("identify.send", { userId, traits, context });
     const ret = analytics.identify({ anonymousId, userId, traits, context, integrations });
-    hull.logger.info("outgoing.user.success", { ...loggingProperties, traits });
+    hull.logger.info("outgoing.user.success", { ...loggingProperties, userId, traits });
 
     if (events && events.length > 0) {
-      events.map(e => {
+      events.map((e) => {
         // Don't forward events of source "segment" when forwarding disabled.
         if (e.event_source === "segment" && !forward_events) {
           hull.logger.info("outgoing.event.skip", { ...loggingProperties, reason: "Segment event without forwarding", event: e.event });
@@ -118,8 +117,6 @@ export default function updateUserFactory(analyticsClient) {
           hull.logger.info("outgoing.event.skip", { ...loggingProperties, reason: "not included in event list", event: e.event });
           return true;
         }
-
-        hull.logger.debug("event.send", { ...loggingProperties, event: e.event });
 
         const { location = {}, page = {}, referrer = {}, os = {}, useragent, ip = 0 } = e.context || {};
         const { event, properties } = e;
@@ -164,7 +161,6 @@ export default function updateUserFactory(analyticsClient) {
           analytics.track(track);
         }
 
-        hull.logger.debug(`${type}.send`, { ...loggingProperties, track });
         hull.logger.info("outgoing.event.success", { ...loggingProperties, type, track });
 
         return true;

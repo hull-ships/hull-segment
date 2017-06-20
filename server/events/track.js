@@ -39,11 +39,11 @@ export default function handleTrack(payload, { hull, metric }) {
 
   tracking.then(
     () => {
-      logger.debug("track.success", { userId, anonymousId, trackContext, event, properties });
+      logger.debug("outgoing.track.success", { userId, anonymousId, trackContext, event, properties });
     },
     message => {
       metric("request.track.error");
-      logger.debug("track.error", { userId, anonymousId, message });
+      logger.debug("outgoing.track.error", { userId, anonymousId, message });
     }
   );
 
