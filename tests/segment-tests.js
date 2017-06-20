@@ -301,8 +301,8 @@ describe("Segment Ship", () => {
           .expect({ message: "thanks" })
           .expect(200)
           .end(() => {
-            assert(log.withArgs("track.start").calledOnce);
-            assert(log.withArgs("track.success").calledOnce);
+            assert(log.withArgs("incoming.track.start").calledOnce);
+            assert(log.withArgs("incoming.track.success").calledOnce);
             done();
           });
     });
