@@ -1,12 +1,12 @@
 import express from "express";
 import path from "path";
+import ejs from "ejs";
+import jwt from "jwt-simple";
 import devMode from "./dev-mode";
 import SegmentHandler from "./handler";
 import handlers from "./events";
-import jwt from "jwt-simple";
 import analyticsClientFactory from "./analytics-client";
 import updateUser from "./update-user";
-import ejs from "ejs";
 
 module.exports = function server(options = {}) {
   const { Hull, hostSecret, onMetric } = options;
@@ -48,7 +48,7 @@ module.exports = function server(options = {}) {
     hostSecret,
     groupTraits: false,
     handler: (notifications = [], context) => {
-      context.hull.logger.debug("batch.handle", { processed: context.processed });
+      context.hull.logger.info("outgoing.batch.handle", { processed: context.processed });
       notifications.map(n => updateUser(analyticsClient)(n, { ...context, ignoreFilters: true }));
     }
   }));
