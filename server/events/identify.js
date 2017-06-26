@@ -57,11 +57,11 @@ export default function handleIdentify(payload, { hull, metric /* , ship*/ }) {
     updating.then(
       ({ t = {} }) => {
         metric("request.identify.updateUser");
-        logger.info("incoming.user.success", { traits: t, email: t.email, externaldId: userId, anonymousId });
+        logger.info("incoming.user.success", { traits: t, email: t.email, externald_id: userId, anonymous_id: anonymousId });
       },
       (error) => {
         metric("request.identify.updateUser.error");
-        logger.info("incoming.user.error", { externaldId: userId, anonymousId, error });
+        logger.info("incoming.user.error", { externald_id: userId, anonymous_id: anonymousId, error });
       }
     );
 
