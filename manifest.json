@@ -30,6 +30,13 @@
       "type": "string"
     },
     {
+      "name": "sending_hero",
+      "title": "Important Note",
+      "headerTemplate": "**Users can only be send to segment.com when at least one identifier is present, this can be either the `External ID` or one or more `Anonymous IDs`.**",
+      "format": "information",
+      "type": "string"
+    },
+    {
       "name": "synchronized_segments",
       "title": "Skips Users who don't belong to any of these segments",
       "description": "Sends everyone if empty.",
