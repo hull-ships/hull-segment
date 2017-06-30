@@ -55,7 +55,10 @@ if (process.env.LIBRATO_TOKEN && process.env.LIBRATO_USER) {
 const app = express();
 const connector = new Hull.Connector({
   hostSecret: options.hostSecret,
-  port: options.port
+  port: options.port,
+  clientConfig: {
+    firehoseUrl: process.env.OVERRIDE_FIREHOSE_URL
+  }
 });
 options.clientMiddleware = connector.clientMiddleware();
 
