@@ -31,9 +31,9 @@
     },
     {
       "name": "sending_hero",
-      "title": "<strong>Note:</strong> Users are only send to segment.com when at least one identifier is present, this can be either the External ID or Anonymous IDs.",
-      "format": "alert",
-      "alert": "info",
+      "title": "Important Note",
+      "headerTemplate": "**Users can only be send to segment.com when at least one identifier is present, this can be either the `External ID` or one or more `Anonymous IDs`.**",
+      "format": "information",
       "type": "string"
     },
     {
