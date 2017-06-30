@@ -117,6 +117,7 @@ export class GroupBatchHandler {
     if (!isEmpty(diff)) {
       this.metric("updateUser");
       return this.hull.as(user.id).traits(diff).then(() => {
+        this.hull.logger.info("incoming.group.success", user);
         return { as: user.id, traits: diff };
       });
     }
@@ -152,7 +153,8 @@ export class GroupBatchHandler {
     ret.then(() => {
       this.stats.success += 1;
       this.stats.flushing -= 1;
-    }, (/* err */) => {
+    }, (err) => {
+      this.hull.logger.error("group.flush.error", err);
       this.stats.error += 1;
       this.stats.flushing -= 1;
     });
