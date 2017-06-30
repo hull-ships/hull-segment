@@ -1,33 +1,23 @@
-import express from "express";
-import path from "path";
+import jwt from "jwt-simple";
+import Promise from "bluebird";
+import { notifHandler } from "hull/lib/utils";
+
 import devMode from "./dev-mode";
 import SegmentHandler from "./handler";
 import handlers from "./events";
-import jwt from "jwt-simple";
+
 import analyticsClientFactory from "./analytics-client";
 import updateUser from "./update-user";
-import ejs from "ejs";
 
-module.exports = function server(options = {}) {
-  const { Hull, hostSecret, onMetric } = options;
-  const { BatchHandler, NotifHandler, Routes, Middleware: hullClient } = Hull;
-  const { Readme, Manifest } = Routes;
-  const app = express();
+
+module.exports = function server(app, options = {}) {
+  const { Hull, hostSecret, onMetric, clientMiddleware } = options;
 
   if (options.devMode) {
     app.use(devMode());
   }
 
-  app.engine("html", ejs.renderFile);
-  app.set("views", path.resolve(__dirname, "..", "views"));
-  app.use(express.static(path.resolve(__dirname, "..", "dist")));
-  app.use(express.static(path.resolve(__dirname, "..", "assets")));
-
-  app.get("/manifest.json", Manifest(__dirname));
-  app.get("/", Readme);
-  app.get("/readme", Readme);
-
-  app.get("/admin.html", hullClient({ hostSecret, fetchShip: false }), (req, res) => {
+  app.get("/admin.html", clientMiddleware, (req, res) => {
     const { config } = req.hull;
     const apiKey = jwt.encode(config, hostSecret);
     const encoded = new Buffer(apiKey).toString("base64");
@@ -36,30 +26,37 @@ module.exports = function server(options = {}) {
   });
 
   const analyticsClient = analyticsClientFactory();
-
-  app.post("/notify", NotifHandler({
-    hostSecret,
-    groupTraits: false,
+  const handler = notifHandler({
+    userHandlerOptions: {
+      groupTraits: false,
+      maxSize: 1,
+      maxTime: 1
+    },
     handlers: {
-      "user:update": updateUser(analyticsClient),
+      "user:update": (ctx, messages = []) => {
+        return Promise.all(messages.map(message => updateUser(analyticsClient)({ message }, {
+          ship: ctx.ship,
+          hull: ctx.client
+        })));
+      }
     }
-  }));
-  app.post("/batch", BatchHandler({
-    hostSecret,
-    groupTraits: false,
-    handler: (notifications = [], context) => {
-      context.hull.logger.debug("batch.handle", { processed: context.processed });
-      notifications.map(n => updateUser(analyticsClient)(n, { ...context, ignoreFilters: true }));
-    }
-  }));
+  });
+
+  // redirect internally /batch  to /notify
+  app.use("/", (req, res, next) => {
+    req.url = req.url.replace("/batch", "/notify");
+    next();
+  });
+
+  app.post("/notify", handler);
+  app.post("/batch", handler);
 
   const segment = SegmentHandler({
     onError(err) {
       console.warn("Error handling segment event", err, err && err.stack);
     },
     onMetric,
-    hostSecret,
-    hullClient,
+    clientMiddleware,
     Hull,
     handlers,
   });

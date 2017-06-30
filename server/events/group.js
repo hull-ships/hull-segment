@@ -162,7 +162,7 @@ export class GroupBatchHandler {
 
 let exiting = false;
 
-function handleGroup(event, { hull, ship, metric }) {
+function handleGroupOld(event, { hull, ship, metric }) {
   const { handle_groups } = ship.settings || {};
   if (exiting) {
     const err = new Error("Exiting...");
@@ -174,7 +174,7 @@ function handleGroup(event, { hull, ship, metric }) {
   return Promise.resolve();
 }
 
-handleGroup.flush = function flushGroup() {
+handleGroupOld.flush = function flushGroup() {
   if (!exiting) {
     exiting = true;
     return Promise.all(map(BATCH_HANDLERS, (h) => h.flush()));
@@ -182,4 +182,25 @@ handleGroup.flush = function flushGroup() {
   return Promise.resolve([]);
 };
 
-export default handleGroup;
+function handleGroupNew(event, { hull }) {
+  if (event && event.groupId) {
+    let scopedClient;
+    if (event.userId) {
+      scopedClient = hull.asUser({ external_id: event.userId })
+        .account({ external_id: event.groupId });
+    } else {
+      scopedClient = hull.asAccount({ external_id: event.groupId });
+    }
+
+    return scopedClient.traits(event.traits);
+  }
+
+  return Promise.resolve();
+}
+
+export default function handleGroup(event, { hull, ship, metric }) {
+  if (ship.settings.handle_accounts) {
+    return handleGroupNew(event, { hull });
+  }
+  return handleGroupOld(event, { hull, ship, metric });
+}
