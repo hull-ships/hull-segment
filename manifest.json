@@ -30,6 +30,13 @@
       "type": "string"
     },
     {
+      "name": "sending_hero",
+      "title": "<strong>Note:</strong> Users are only send to segment.com when at least one identifier is present, this can be either the External ID or Anonymous IDs.",
+      "format": "alert",
+      "alert": "info",
+      "type": "string"
+    },
+    {
       "name": "synchronized_segments",
       "title": "Skips Users who don't belong to any of these segments",
       "description": "Sends everyone if empty.",
