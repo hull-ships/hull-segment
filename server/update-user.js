@@ -87,7 +87,7 @@ export default function updateUserFactory(analyticsClient) {
           return group;
         }, {});
         if (!_.isEmpty(groupTraits)) {
-          hull.logger.debug("group.send", { ...loggingProperties, groupId, traits: groupTraits, context });
+          hull.logger.info("outgoing.group.success", { ...loggingProperties, groupId, traits: groupTraits, context });
           analytics.group({ groupId, anonymousId, userId, traits: groupTraits, context, integrations });
         }
       }

@@ -1,3 +1,6 @@
+## v0.1.1
+- logging messages updates - levels adjusted and added more ident info
+
 ## v0.1.0
 - hull-node upgraded to 0.11
 - accounts support - enabled via `handle_accounts` setting
