@@ -15,5 +15,10 @@ export default function handleScreen(payload = {}, context = {}) {
     active: true
   };
 
-  return track(screen, context);
+  return track(screen, context)
+  .then(() => {
+    context.hull.logger.info("incoming.screen.success", payload);
+  }, (error) => {
+    context.hull.logger.info("incoming.screen.error", { ...payload, error });
+  });
 }

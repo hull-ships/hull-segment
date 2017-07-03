@@ -7,7 +7,7 @@
   "ui": false,
   "admin" : "admin.html",
   "readme" : "readme.md",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "deployment_settings":[
     {
       "name"       : "_selector",
@@ -27,6 +27,13 @@
       "name": "sending_title",
       "title": "Sending data to segment",
       "format": "title",
+      "type": "string"
+    },
+    {
+      "name": "sending_hero",
+      "title": "Important Note",
+      "headerTemplate": "**Users can only be send to segment.com when at least one identifier is present, this can be either the `External ID` or one or more `Anonymous IDs`.**",
+      "format": "information",
       "type": "string"
     },
     {
@@ -108,6 +115,13 @@
       "name" : "handle_groups",
       "title" : "Handle Groups",
       "description" : "Handle group attributes as user traits, prefixed with 'group/'",
+      "type" : "boolean",
+      "default" : false
+    },
+    {
+      "name" : "handle_accounts",
+      "title" : "Handle Accounts",
+      "description" : "Handle group attributes as account traits",
       "type" : "boolean",
       "default" : false
     }

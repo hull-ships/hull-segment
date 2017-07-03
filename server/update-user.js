@@ -1,12 +1,5 @@
 import _ from "lodash";
 
-// function camelize(str) {
-//   return str.replace (/(?:^|[-_])(\w)/g, function (_, c, i) {
-//     var s = i == 0 ? c : c.toUpperCase();
-//     return c ? s : "";
-//   });
-// };
-
 export default function updateUserFactory(analyticsClient) {
   return function updateUser({ message = {} }, { ship = {}, hull = {}, ignoreFilters = false }) {
     const { user = {}, segments = [], events = [] } = message;

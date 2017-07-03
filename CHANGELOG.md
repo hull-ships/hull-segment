@@ -1,3 +1,7 @@
+## v0.1.0
+- hull-node upgraded to 0.11
+- accounts support - enabled via `handle_accounts` setting
+
 ## v0.0.4
 - standardize log messages
 - update Build & Test dependencies
