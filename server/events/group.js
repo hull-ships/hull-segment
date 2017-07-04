@@ -74,7 +74,7 @@ export class GroupBatchHandler {
         const startTime = new Date();
         return hull.post("search/user_reports", pageParams).then(({ data, pagination }) => {
           metric("searchResponseTime", new Date() - startTime);
-          data.map(u => {
+          data.map((u) => {
             users[u.id] = u;
             return u;
           });
@@ -89,7 +89,7 @@ export class GroupBatchHandler {
   }
 
   getUsersByGroup(groupIds = []) {
-    return this.searchUsers(groupIds).then(users => {
+    return this.searchUsers(groupIds).then((users) => {
       return users.reduce((groups, user) => {
         const groupId = user["traits_group/id"];
         groups[groupId] = groups[groupId] || {};
@@ -108,7 +108,7 @@ export class GroupBatchHandler {
   updateUser(user, traits) {
     const diff = reduce(traits, (t, v, k) => {
       // drop nested properties
-      if (v !== user[`traits_group/${k}`] && typeof(v) !== "object") {
+      if (v !== user[`traits_group/${k}`] && typeof (v) !== "object") {
         t[`group/${k}`] = v;
       }
       return t;
@@ -179,7 +179,7 @@ function handleGroupOld(event, { hull, ship, metric }) {
 handleGroupOld.flush = function flushGroup() {
   if (!exiting) {
     exiting = true;
-    return Promise.all(map(BATCH_HANDLERS, (h) => h.flush()));
+    return Promise.all(map(BATCH_HANDLERS, h => h.flush()));
   }
   return Promise.resolve([]);
 };

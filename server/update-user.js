@@ -9,7 +9,7 @@ export default function updateUserFactory(analyticsClient) {
       return false;
     }
 
-    const loggingProperties = _.pick(user, "id", "email", "external_id");
+    const loggingProperties = _.pick(user, "hull_id", "email", "external_id");
 
     // Custom properties to be synchronized
     const {
@@ -125,7 +125,12 @@ export default function updateUserFactory(analyticsClient) {
           properties,
           integrations,
           context: {
-            ip, groupId, os, page, traits, location,
+            ip,
+            groupId,
+            os,
+            page,
+            traits,
+            location,
             userAgent: useragent,
             active: true,
           }

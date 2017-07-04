@@ -30,3 +30,14 @@ npm run watch #builds client package
 npm run build # build
 # Checkout package.json for more tasks
 ```
+
+### Logs :
+
+Below list presents specific log messages for Segment Connector :
+
+* incoming.group.success - logged after successful user update
+* incoming.screen.success - logged on successfully screen handling
+* incoming.track.success - logged on successful track handling
+* outgoing.group.success - batch of incoming users updated separately. It will also cause to update metric for each updated user
+* outgoing.event.success - logged on successfully updated user factory
+* outgoing.event.skip - logged events that are skipped if forward_events variable is set to true

@@ -20,9 +20,16 @@ export default function handleTrack(payload, { hull, metric }) {
 
   const trackContext = reduce({
     source: "segment",
-    created_at, _bid, _sid,
-    url, referrer, useragent: userAgent,
-    ip, latitude, longitude, active
+    created_at,
+    _bid,
+    _sid,
+    url,
+    referrer,
+    useragent: userAgent,
+    ip,
+    latitude,
+    longitude,
+    active
   }, (p, v, k) => {
     if (v !== undefined) {
       p[k] = v;
@@ -37,13 +44,15 @@ export default function handleTrack(payload, { hull, metric }) {
 
   const tracking = scoped(hull, payload).track(event, properties, trackContext);
 
-  return tracking.then(
+  return tracking.then(result =>
     () => {
       logger.info("incoming.track.success", { external_id: userId, anonymous_id: anonymousId, trackContext, event, properties });
+      return Promise.resolve(result);
     },
-    message => {
+    (message) => {
       metric("request.track.error");
-      logger.info("incoming.track.error", { external_id: userId, anonymous_id: anonymousId, message });
+      logger.error("incoming.track.error", { external_id: userId, anonymous_id: anonymousId, message });
+      return Promise.reject();
     }
   );
 }
