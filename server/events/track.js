@@ -43,7 +43,6 @@ export default function handleTrack(payload, { hull, metric }) {
   }
 
   const tracking = scoped(hull, payload).track(event, properties, trackContext);
-
   return tracking.then(result =>
     () => {
       logger.info("incoming.track.success", { external_id: userId, anonymous_id: anonymousId, trackContext, event, properties });
