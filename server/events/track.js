@@ -42,15 +42,15 @@ export default function handleTrack(payload, { hull, metric }) {
     delete payload.userId;
   }
 
-  const tracking = scoped(hull, payload).track(event, properties, trackContext);
-  return tracking.then(result =>
+  const scopedUser = Promise.resolve(scoped(hull, payload).track(event, properties, trackContext));
+  return scopedUser.then(result =>
     () => {
-      logger.info("incoming.track.success", { external_id: userId, anonymous_id: anonymousId, trackContext, event, properties });
+      logger.info("incoming.track.success", { userIdent: { external_id: userId, anonymous_id: anonymousId, trackContext, event, properties } });
       return Promise.resolve(result);
     },
     (message) => {
       metric("request.track.error");
-      logger.error("incoming.track.error", { external_id: userId, anonymous_id: anonymousId, message });
+      logger.error("incoming.track.error", { userIdent: { external_id: userId, anonymous_id: anonymousId, message } });
       return Promise.reject();
     }
   );

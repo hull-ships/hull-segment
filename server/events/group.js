@@ -116,8 +116,10 @@ export class GroupBatchHandler {
 
     if (!isEmpty(diff)) {
       this.metric("updateUser");
-      return this.hull.asUser(user.id).traits(diff).then(() => {
-        this.hull.logger.info("incoming.group.success", user);
+
+      const asUser = this.hull.asUser(user.id);
+      return asUser.traits(diff).then(() => {
+        asUser.logger.info("incoming.group.success", user);
         return { as: user.id, traits: diff };
       });
     }
