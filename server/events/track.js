@@ -42,10 +42,10 @@ export default function handleTrack(payload, { hull, metric }) {
     delete payload.userId;
   }
 
-  const scopedUser = Promise.resolve(scoped(hull, payload).track(event, properties, trackContext));
-  return scopedUser.then(result =>
+  const scopedUser = scoped(hull, payload).track(event, properties, trackContext);
+  return Promise.resolve(scopedUser.then(result =>
     () => {
-      logger.info("incoming.track.success", { userIdent: { external_id: userId, anonymous_id: anonymousId, trackContext, event, properties } });
+      scopedUser.logger.info("incoming.track.success", { userIdent: { external_id: userId, anonymous_id: anonymousId, trackContext, event, properties } });
       return Promise.resolve(result);
     },
     (message) => {
@@ -53,5 +53,5 @@ export default function handleTrack(payload, { hull, metric }) {
       logger.error("incoming.track.error", { userIdent: { external_id: userId, anonymous_id: anonymousId, message } });
       return Promise.reject();
     }
-  );
+  ));
 }
