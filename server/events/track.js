@@ -45,12 +45,12 @@ export default function handleTrack(payload, { hull, metric }) {
   const scopedUser = scoped(hull, payload).track(event, properties, trackContext);
   return Promise.resolve(scopedUser.then(result =>
     () => {
-      scopedUser.logger.info("incoming.track.success", { external_id: userId, anonymous_id: anonymousId, trackContext, event, properties });
+      scopedUser.logger.info("incoming.track.success", { trackContext, event, properties });
       return Promise.resolve(result);
     },
     (message) => {
       metric("request.track.error");
-      logger.error("incoming.track.error", { external_id: userId, anonymous_id: anonymousId, message });
+      scopedUser.logger.error("incoming.track.error", { errors: message });
       return Promise.reject();
     }
   ));

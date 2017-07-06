@@ -119,7 +119,7 @@ export class GroupBatchHandler {
 
       const asUser = this.hull.asUser(user.id);
       return asUser.traits(diff).then(() => {
-        asUser.logger.debug("incoming.group.success", user);
+        asUser.logger.info("incoming.group.success", user);
         return { as: user.id, traits: diff };
       });
     }
@@ -156,7 +156,7 @@ export class GroupBatchHandler {
       this.stats.success += 1;
       this.stats.flushing -= 1;
     }, (err) => {
-      this.hull.logger.error("group.flush.error", err);
+      this.hull.logger.debug("group.flush.error", err);
       this.stats.error += 1;
       this.stats.flushing -= 1;
     });

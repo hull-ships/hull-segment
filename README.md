@@ -35,6 +35,11 @@ npm run build # build
 
 Below list presents specific log messages for Segment Connector :
 
-* incoming.screen.success - logged on successfully screen handling
 * incoming.track.success - logged on successful track handling
-* outgoing.group.success - batch of incoming users updated separately. It will also cause to update metric for each updated user
+* incoming.track.error - logged when encountered error during track handling
+
+* outgoing.group.success - batch of outgoing users updated separately. It will also cause to update metric for each updated user
+* incoming.group.success - logged when successfully updated user
+
+* incoming.screen.success - logged on successfully screen handling
+* incoming.screen.error - logged when encountered error during screen handling
