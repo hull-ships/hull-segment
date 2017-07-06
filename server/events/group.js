@@ -119,7 +119,7 @@ export class GroupBatchHandler {
 
       const asUser = this.hull.asUser(user.id);
       return asUser.traits(diff).then(() => {
-        asUser.logger.info("incoming.group.success", user);
+        asUser.logger.debug("incoming.group.success", user);
         return { as: user.id, traits: diff };
       });
     }

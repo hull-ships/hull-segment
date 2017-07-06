@@ -9,7 +9,7 @@ export default function updateUserFactory(analyticsClient) {
       return false;
     }
 
-    const loggingProperties = { hull_id: user.id, email: user.email, external_id: user.external_id };
+    const loggingProperties = _.pick(user, ["email", "id", "external_id"]);
 
     // Custom properties to be synchronized
     const {
@@ -33,7 +33,7 @@ export default function updateUserFactory(analyticsClient) {
     // Ignore if write_key is not present
     const { write_key, handle_groups, public_id_field } = ship.settings || {};
     if (!write_key) {
-      hull.logger.info("outgoing.user.skip", { userIdent: loggingProperties, reason: "no write key", traits });
+      hull.asUser(loggingProperties).logger.info("outgoing.user.skip", { reason: "no write key", traits });
       return false;
     }
 
@@ -56,7 +56,7 @@ export default function updateUserFactory(analyticsClient) {
 
     // We have no identifier for the user, we have to skip
     if (!userId && !anonymousId) {
-      hull.logger.info("outgoing.user.skip", { userIdent: loggingProperties, reason: "No Identifier (userId or anonymousId)", traits });
+      hull.asUser(loggingProperties).logger.info("outgoing.user.skip", { reason: "No Identifier (userId or anonymousId)", traits });
       return false;
     }
 
@@ -66,7 +66,7 @@ export default function updateUserFactory(analyticsClient) {
       synchronized_segments.length > 0 && // Should we move to "Send no one by default ?"
       !_.intersection(segment_ids, synchronized_segments).length
       ) {
-      hull.logger.info("outgoing.user.skip", { userIdent: loggingProperties, reason: "not matching any segment", segment_ids, traits });
+      hull.asUser(loggingProperties).logger.info("outgoing.user.skip", { reason: "not matching any segment", segment_ids, traits });
       return false;
     }
 
@@ -87,7 +87,7 @@ export default function updateUserFactory(analyticsClient) {
           return group;
         }, {});
         if (!_.isEmpty(groupTraits)) {
-          hull.logger.info("outgoing.group.success", { userIdent: loggingProperties, groupId, traits: groupTraits, context });
+          hull.logger.info("outgoing.group.success", { ...loggingProperties, groupId, traits: groupTraits, context });
           analytics.group({ groupId, anonymousId, userId, traits: groupTraits, context, integrations });
         }
       }
@@ -97,17 +97,17 @@ export default function updateUserFactory(analyticsClient) {
 
 
     const ret = analytics.identify({ anonymousId, userId, traits, context, integrations });
-    hull.logger.info("outgoing.user.success", { userIdent: loggingProperties, userId, traits });
+    hull.asUser(loggingProperties).logger.info("outgoing.user.success", { userId, traits });
 
     if (events && events.length > 0) {
       events.map((e) => {
         // Don't forward events of source "segment" when forwarding disabled.
         if (e.event_source === "segment" && !forward_events) {
-          hull.logger.info("outgoing.event.skip", { userIdent: loggingProperties, reason: "Segment event without forwarding", event: e.event });
+          hull.asUser(loggingProperties).logger.info("outgoing.event.skip", { reason: "Segment event without forwarding", event: e.event });
           return true;
         }
         if (send_events && send_events.length && !_.includes(send_events, e.event)) {
-          hull.logger.info("outgoing.event.skip", { userIdent: loggingProperties, reason: "not included in event list", event: e.event });
+          hull.asUser(loggingProperties).logger.info("outgoing.event.skip", { reason: "not included in event list", event: e.event });
           return true;
         }
 
@@ -159,8 +159,7 @@ export default function updateUserFactory(analyticsClient) {
           analytics.track(track);
         }
 
-        hull.logger.info("outgoing.event.success", { userIdent: loggingProperties, type, track });
-
+        hull.asUser(loggingProperties).logger.info("outgoing.event.success", { type, track });
         return true;
       });
     }
