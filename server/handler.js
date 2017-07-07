@@ -17,8 +17,7 @@ function authTokenMiddleware(req, res, next) {
     const [authType, token64] = req.headers.authorization.split(" ");
     if (authType === "Basic" && token64) {
       try {
-        const token = new Buffer(token64, "base64").toString().split(":")[0].trim();
-        req.hull.token = token;
+        req.hull.token = new Buffer(token64, "base64").toString().split(":")[0].trim();
         req.hull.config = false;
       } catch (err) {
         const e = new Error("Invalid Basic Auth Header");

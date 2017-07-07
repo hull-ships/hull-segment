@@ -36,7 +36,6 @@ function updateUser(hull, user) {
 
 export default function handleIdentify(payload, { hull, metric /* , ship*/ }) {
   const { /* context, */ traits, userId, anonymousId, integrations = {} } = payload;
-  const { logger } = hull;
   const user = reduce((traits || {}), (u, v, k) => {
     if (v == null) return u;
     if (ALIASED_FIELDS[k.toLowerCase()]) {
@@ -55,13 +54,13 @@ export default function handleIdentify(payload, { hull, metric /* , ship*/ }) {
     const updating = updateUser(hull, user);
 
     updating.then(
-      ({ t }) => {
+      ({ t = {} }) => {
         metric("request.identify.updateUser");
-        logger.debug("incoming.user.success", { traits: t, userId, anonymousId });
+        hull.asUser({ email: t.email, externald_id: userId, anonymous_id: anonymousId }).logger.info("incoming.user.success", { traits: t });
       },
-      error => {
+      (error) => {
         metric("request.identify.updateUser.error");
-        logger.debug("incoming.user.error", { userId, anonymousId, error });
+        hull.asUser({ externald_id: userId, anonymous_id: anonymousId }).logger.error("incoming.user.error", { errors: error });
       }
     );
 

@@ -74,7 +74,7 @@ export class GroupBatchHandler {
         const startTime = new Date();
         return hull.post("search/user_reports", pageParams).then(({ data, pagination }) => {
           metric("searchResponseTime", new Date() - startTime);
-          data.map(u => {
+          data.map((u) => {
             users[u.id] = u;
             return u;
           });
@@ -89,7 +89,7 @@ export class GroupBatchHandler {
   }
 
   getUsersByGroup(groupIds = []) {
-    return this.searchUsers(groupIds).then(users => {
+    return this.searchUsers(groupIds).then((users) => {
       return users.reduce((groups, user) => {
         const groupId = user["traits_group/id"];
         groups[groupId] = groups[groupId] || {};
@@ -108,7 +108,7 @@ export class GroupBatchHandler {
   updateUser(user, traits) {
     const diff = reduce(traits, (t, v, k) => {
       // drop nested properties
-      if (v !== user[`traits_group/${k}`] && typeof(v) !== "object") {
+      if (v !== user[`traits_group/${k}`] && typeof (v) !== "object") {
         t[`group/${k}`] = v;
       }
       return t;
@@ -116,8 +116,13 @@ export class GroupBatchHandler {
 
     if (!isEmpty(diff)) {
       this.metric("updateUser");
-      return this.hull.as(user.id).traits(diff).then(() => {
+
+      const asUser = this.hull.asUser(user.id);
+      return asUser.traits(diff).then(() => {
+        asUser.logger.info("incoming.group.success", user);
         return { as: user.id, traits: diff };
+      }, (error) => {
+        asUser.logger.error("incoming.group.error", { errors: error });
       });
     }
     return Promise.resolve({ as: user.id });
@@ -152,7 +157,8 @@ export class GroupBatchHandler {
     ret.then(() => {
       this.stats.success += 1;
       this.stats.flushing -= 1;
-    }, (/* err */) => {
+    }, (err) => {
+      this.hull.logger.debug("group.flush.error", err);
       this.stats.error += 1;
       this.stats.flushing -= 1;
     });
@@ -177,7 +183,7 @@ function handleGroupOld(event, { hull, ship, metric }) {
 handleGroupOld.flush = function flushGroup() {
   if (!exiting) {
     exiting = true;
-    return Promise.all(map(BATCH_HANDLERS, (h) => h.flush()));
+    return Promise.all(map(BATCH_HANDLERS, h => h.flush()));
   }
   return Promise.resolve([]);
 };
