@@ -121,6 +121,8 @@ export class GroupBatchHandler {
       return asUser.traits(diff).then(() => {
         asUser.logger.info("incoming.group.success", user);
         return { as: user.id, traits: diff };
+      }, (error) => {
+        asUser.logger.error("incoming.group.error", { errors: error });
       });
     }
     return Promise.resolve({ as: user.id });

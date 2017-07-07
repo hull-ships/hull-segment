@@ -46,7 +46,7 @@ export default function handleTrack(payload, { hull, metric }) {
   return Promise.resolve(scopedUser.then(result =>
     () => {
       scopedUser.logger.info("incoming.track.success", { trackContext, event, properties });
-      return Promise.resolve(result);
+      return result;
     },
     (message) => {
       metric("request.track.error");
