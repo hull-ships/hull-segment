@@ -42,8 +42,8 @@ export default function handleTrack(payload, { hull, metric }) {
     delete payload.userId;
   }
 
-  const scopedUser = scoped(hull, payload).track(event, properties, trackContext);
-  return Promise.resolve(scopedUser.then(result =>
+  const scopedUser = scoped(hull, payload);
+  return scopedUser.track(event, properties, trackContext).then(result =>
     () => {
       scopedUser.logger.info("incoming.track.success", { trackContext, event, properties });
       return result;
@@ -53,5 +53,5 @@ export default function handleTrack(payload, { hull, metric }) {
       scopedUser.logger.error("incoming.track.error", { errors: message });
       return Promise.reject();
     }
-  ));
+  );
 }
