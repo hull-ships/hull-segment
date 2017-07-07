@@ -1,13 +1,7 @@
-/* eslint global-require: 0 */
 import Hull from "hull";
 import express from "express";
 
 import server from "./server";
-
-if (process.env.NEW_RELIC_LICENSE_KEY) {
-  console.warn("Starting newrelic agent with key: ", process.env.NEW_RELIC_LICENSE_KEY);
-  require("newrelic");
-}
 
 if (process.env.LOG_LEVEL) {
   Hull.logger.transports.console.level = process.env.LOG_LEVEL;
