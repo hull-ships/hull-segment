@@ -49,7 +49,7 @@ export default function updateUserFactory(analyticsClient) {
       anonymousId = _.first(user.anonymous_ids);
     }
 
-    const publicIdField = public_id_field === "id" ? "id" : "external_id";
+    const publicIdField = public_id_field; // === "id" ? "id" : "external_id";
 
     const userId = user[publicIdField];
     const groupId = user["traits_group/id"];

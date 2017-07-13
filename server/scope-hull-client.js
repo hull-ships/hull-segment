@@ -6,7 +6,7 @@ export default function scope(hull, user = {} /* , context = {}*/) {
     return hull;
   }
   const as = {};
-
+  // Ignore these lines via settings to drop externalId
   if (hullId || userId) {
     if (hullId) { as.id = hullId; }
     if (userId) { as.external_id = userId; }

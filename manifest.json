@@ -109,7 +109,15 @@
       "type" : "string",
       "enum" : [ "id", "external_id" ],
       "default" : "external_id",
-      "format" : "hidden"
+      "format" : "trait"
+    },
+    {
+      "name": "ignore_segment_userId",
+      "title": "Ignore Segment User ID",
+      "description": "Ignore userId from segment.com for data received, use email or anonymousIds instead",
+      "type": "boolean",
+      "default": false,
+      "format": "hidden"
     },
     {
       "name" : "handle_groups",
