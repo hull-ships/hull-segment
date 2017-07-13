@@ -15,12 +15,18 @@ const IGNORED_TRAITS = [
   "visitToken"
 ];
 
-function updateUser(hull, user) {
+function updateUser(hull, user, shipSettings) {
   try {
     const { userId, anonymousId, traits = {} } = user;
-    if (!userId && !anonymousId) { return false; }
+    const { email } = traits || {};
 
-    return scoped(hull, user).traits(traits).then(
+    if (shipSettings.ignore_segment_userId === true && !email && !anonymousId) {
+      return false;
+    } else if (!userId && !anonymousId) {
+      return false;
+    }
+
+    return scoped(hull, user, shipSettings).traits(traits).then(
       (/* response*/) => {
         return { traits };
       },
@@ -34,8 +40,8 @@ function updateUser(hull, user) {
   }
 }
 
-export default function handleIdentify(payload, { hull, metric /* , ship*/ }) {
-  const { /* context, */ traits, userId, anonymousId, integrations = {} } = payload;
+export default function handleIdentify(payload, { hull, metric, ship }) {
+  const { traits, userId, anonymousId, integrations = {} } = payload;
   const user = reduce((traits || {}), (u, v, k) => {
     if (v == null) return u;
     if (ALIASED_FIELDS[k.toLowerCase()]) {
@@ -51,7 +57,7 @@ export default function handleIdentify(payload, { hull, metric /* , ship*/ }) {
     delete user.userId;
   }
   if (!isEmpty(user.traits)) {
-    const updating = updateUser(hull, user);
+    const updating = updateUser(hull, user, ship.settings);
 
     updating.then(
       ({ t = {} }) => {

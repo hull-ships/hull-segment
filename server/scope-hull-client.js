@@ -1,15 +1,19 @@
 const EMAIL_REGEXP = /([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})/i;
 
-export default function scope(hull, user = {} /* , context = {}*/) {
+export default function scope(hull, user = {}, settings) {
   const { hullId, userId, anonymousId, traits = {} } = user;
   if (!hullId && !userId && !anonymousId) {
     return hull;
   }
   const as = {};
-  // Ignore these lines via settings to drop externalId
-  if (hullId || userId) {
-    if (hullId) { as.id = hullId; }
-    if (userId) { as.external_id = userId; }
+
+  // Allow to ignore segment's userId altogether
+  // via the `ignore_segment_userId` setting.
+  if (settings.ignore_segment_userId !== true) {
+    if (hullId || userId) {
+      if (hullId) { as.id = hullId; }
+      if (userId) { as.external_id = userId; }
+    }
   }
 
   if (traits.email && EMAIL_REGEXP.test(traits.email)) {
