@@ -28,7 +28,7 @@ export default function updateUserFactory(analyticsClient) {
         return true;
       });
     }
-    console.log(ignoreFilters);
+
     // Configure Analytics.js with write key
     // Ignore if write_key is not present
     const { write_key, handle_groups, public_id_field } = ship.settings || {};
