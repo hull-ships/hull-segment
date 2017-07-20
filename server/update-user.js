@@ -28,7 +28,7 @@ export default function updateUserFactory(analyticsClient) {
         return true;
       });
     }
-
+    console.log(ignoreFilters);
     // Configure Analytics.js with write key
     // Ignore if write_key is not present
     const { write_key, handle_groups, public_id_field } = ship.settings || {};
@@ -49,7 +49,10 @@ export default function updateUserFactory(analyticsClient) {
       anonymousId = _.first(user.anonymous_ids);
     }
 
-    const publicIdField = public_id_field; // === "id" ? "id" : "external_id";
+    let publicIdField = "external_id";
+    if (public_id_field) {
+      publicIdField = public_id_field;
+    }
 
     const userId = user[publicIdField];
     const groupId = user["traits_group/id"];

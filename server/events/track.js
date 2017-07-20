@@ -42,8 +42,8 @@ export default function handleTrack(payload, { hull, metric, ship }) {
   }
 
   const scopedUser = scoped(hull, payload, ship.settings);
-  return scopedUser.track(event, properties, trackContext).then(result =>
-    () => {
+  return scopedUser.track(event, properties, trackContext).then(
+    (result) => {
       scopedUser.logger.info("incoming.track.success", { trackContext, event, properties });
       return result;
     },
