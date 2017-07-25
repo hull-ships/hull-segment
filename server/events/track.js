@@ -1,10 +1,9 @@
 import { reduce } from "lodash";
 import scoped from "../scope-hull-client";
 
-export default function handleTrack(payload, { hull, metric }) {
+export default function handleTrack(payload, { hull, metric, ship }) {
   const { context = {}, active, anonymousId, event, properties, userId, originalTimestamp, sentAt, receivedAt, integrations = {} } = payload;
 
-  const { logger } = hull;
   const { page = {}, location = {}, userAgent, ip = "0" } = context;
   const { url, referrer } = page;
   const { latitude, longitude } = location;
@@ -42,7 +41,7 @@ export default function handleTrack(payload, { hull, metric }) {
     delete payload.userId;
   }
 
-  const scopedUser = scoped(hull, payload);
+  const scopedUser = scoped(hull, payload, ship.settings);
   return scopedUser.track(event, properties, trackContext).then(
     (result) => {
       scopedUser.logger.info("incoming.track.success", { trackContext, event, properties });

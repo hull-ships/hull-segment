@@ -11,45 +11,56 @@ import updateUser from "./update-user";
 
 
 module.exports = function server(app, options = {}) {
-  const { Hull, hostSecret, onMetric, clientMiddleware } = options;
+  const {
+    Hull,
+    hostSecret,
+    onMetric,
+    clientMiddleware
+  } = options;
 
   if (options.devMode) {
     app.use(devMode());
   }
 
   app.get("/admin.html", clientMiddleware, (req, res) => {
-    const { config } = req.hull;
+    const {
+      config
+    } = req.hull;
     const apiKey = jwt.encode(config, hostSecret);
     const encoded = new Buffer(apiKey).toString("base64");
     const hostname = req.hostname;
-    res.render("admin.html", { apiKey, encoded, hostname });
+    res.render("admin.html", {
+      apiKey,
+      encoded,
+      hostname
+    });
   });
 
   const analyticsClient = analyticsClientFactory();
-  const handler = notifHandler({
-    userHandlerOptions: {
-      groupTraits: false,
-      maxSize: 1,
-      maxTime: 1
-    },
-    handlers: {
-      "user:update": (ctx, messages = []) => {
-        return Promise.all(messages.map(message => updateUser(analyticsClient)({ message }, {
-          ship: ctx.ship,
-          hull: ctx.client
-        })));
+
+  function handlerFactory(ignoreFilters = false) {
+    return notifHandler({
+      userHandlerOptions: {
+        groupTraits: false,
+        maxSize: 1,
+        maxTime: 1
+      },
+      handlers: {
+        "user:update": (ctx, messages = []) => {
+          return Promise.all(messages.map(message => updateUser(analyticsClient)({
+            message
+          }, {
+            ship: ctx.ship,
+            hull: ctx.client,
+            ignoreFilters
+          })));
+        }
       }
-    }
-  });
+    });
+  }
 
-  // redirect internally /batch  to /notify
-  app.use("/", (req, res, next) => {
-    req.url = req.url.replace("/batch", "/notify");
-    next();
-  });
-
-  app.post("/notify", handler);
-  app.post("/batch", handler);
+  app.post("/notify", handlerFactory());
+  app.post("/batch", handlerFactory(true));
 
   const segment = SegmentHandler({
     onError(err) {
@@ -78,7 +89,9 @@ module.exports = function server(app, options = {}) {
       console.log(err.stack);
     }
 
-    return res.status(err.status || 500).send({ message: err.message });
+    return res.status(err.status || 500).send({
+      message: err.message
+    });
   });
 
   app.exit = () => segment.exit();

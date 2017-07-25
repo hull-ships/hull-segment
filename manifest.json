@@ -7,7 +7,7 @@
   "ui": false,
   "admin" : "admin.html",
   "readme" : "readme.md",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "deployment_settings":[
     {
       "name"       : "_selector",
@@ -110,6 +110,14 @@
       "enum" : [ "id", "external_id" ],
       "default" : "external_id",
       "format" : "hidden"
+    },
+    {
+      "name": "ignore_segment_userId",
+      "title": "Ignore Segment User ID",
+      "description": "Ignore userId from segment.com for data received, use email or anonymousIds instead",
+      "type": "boolean",
+      "default": false,
+      "format": "hidden"
     },
     {
       "name" : "handle_groups",
