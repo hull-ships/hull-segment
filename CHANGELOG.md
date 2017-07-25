@@ -1,7 +1,9 @@
-## v0.1.2
-- hotfix the wrong incoming track handler
+## v0.1.3
 - hotfix ignore filters on batch
 - hotfix public_id field
+
+## v0.1.2
+- hotfix the wrong incoming track handler
 
 ## v0.1.1
 - logging messages updates - levels adjusted and added more ident info
