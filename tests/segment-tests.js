@@ -1,40 +1,41 @@
 /* global describe, it */
-const request = require("supertest");
-const sinon = require("sinon");
-const assert = require("assert");
-const jwt = require("jwt-simple");
-
 import _ from "lodash";
 import express from "express";
 import bodyParser from "body-parser";
 import Hull from "hull";
 
+import request from "supertest";
+import sinon from "sinon";
+import assert from "assert";
+import jwt from "jwt-simple";
+
+
 const server = require("../server/server");
 
 const { track, identify, page, screen } = require("./fixtures");
 
-const API_RESPONSES = {
-  default: {
-    settings: {
-      handle_pages: false,
-      handle_screens: false
-    }
-  },
-  page: {
-    settings: {
-      handle_pages: true,
-      handle_screens: false
-    }
-  },
-  screen: {
-    settings: {
-      handle_pages: false,
-      handle_screens: true
-    }
-  }
-};
+// const API_RESPONSES = {
+//   default: {
+//     settings: {
+//       handle_pages: false,
+//       handle_screens: false
+//     }
+//   },
+//   page: {
+//     settings: {
+//       handle_pages: true,
+//       handle_screens: false
+//     }
+//   },
+//   screen: {
+//     settings: {
+//       handle_pages: false,
+//       handle_screens: true
+//     }
+//   }
+// };
+//
 
-function route() {}
 function noop() {}
 
 const hostSecret = "shuut";
@@ -46,7 +47,7 @@ const config = {
   ship: "56f3d53ef89a8791cb000004"
 };
 
-function sendRequest({ query, body, headers, metric, logger }) {
+function sendRequest({ query, body, headers, metric }) {
   const app = express();
   const connector = new Hull.Connector({
     hostSecret,
@@ -64,6 +65,7 @@ function sendRequest({ query, body, headers, metric, logger }) {
 function mockHullFactory(postSpy, getResponse) {
   return function MockHull() {
     this.as = () => this;
+    this.asUser = () => this;
     this.get = () => Promise.resolve(getResponse);
     this.post = (path, params) => {
       postSpy(path, params);
@@ -198,7 +200,6 @@ describe("Segment Ship", () => {
           }, 10);
         });
     });
-
     it("call Hull.track on page event", (done) => {
       sendRequest({ body: page, query: config })
         .expect({ message: "thanks" })
@@ -212,7 +213,6 @@ describe("Segment Ship", () => {
           }, 10);
         });
     });
-
     it("should not Hull.track on page event by default", (done) => {
       shipData = {
         settings: {}
@@ -228,8 +228,6 @@ describe("Segment Ship", () => {
           }, 10);
         });
     });
-
-
     it("call Hull.track on screen event", (done) => {
       // const postSpy = sinon.spy();
       // const MockHull = mockHullFactory(postSpy, API_RESPONSES.screen);
@@ -257,23 +255,45 @@ describe("Segment Ship", () => {
         });
     });
 
-    it("should not Hull.track on screen event by default", (done) => {
+    it("Ignores incoming userId if settings.ignore_segment_userId is true", (done) => {
       shipData = {
-        settings: {}
+        settings: { ignore_segment_userId: true }
       };
-      sendRequest({ body: screen, query: config })
-        .expect({ message: "thanks" })
+      sendRequest({ body: { ...identify }, query: config })
         .expect(200)
+        .expect({ message: "thanks" })
         .end(() => {
           setTimeout(() => {
             const tReq = _.find(requests, { url: "/api/v1/firehose" });
-            assert(!tReq);
+            const tokenClaims = jwt.decode(tReq.body.batch[0].headers["Hull-Access-Token"], hullSecret);
+            assert(_.isEqual(tokenClaims["io.hull.asUser"], { email: identify.traits.email }));
+            assert(tReq.body.batch[0].type === "traits");
+            done();
+          }, 10);
+        });
+    });
+
+    it("Skip if settings.ignore_segment_userId is true and we have no email", (done) => {
+      shipData = {
+        settings: { ignore_segment_userId: true }
+      };
+      const traits = { first_name: "Bob" };
+      sendRequest({ body: { ...identify, traits }, query: config })
+        .expect(200)
+        .expect({ message: "thanks" })
+        .end(() => {
+          setTimeout(() => {
+            const tReq = _.find(requests, { url: "/api/v1/firehose" });
+            assert(_.isNil(tReq));
             done();
           }, 10);
         });
     });
 
     it("call Hull.traits on identify event", (done) => {
+      shipData = {
+        settings: {}
+      };
       const traits = {
         id: "12",
         visitToken: "boom",
@@ -299,15 +319,32 @@ describe("Segment Ship", () => {
           };
           setTimeout(() => {
             const tReq = _.find(requests, { url: "/api/v1/firehose" });
+            const tokenClaims = jwt.decode(tReq.body.batch[0].headers["Hull-Access-Token"], hullSecret);
+            assert(_.isEqual(tokenClaims["io.hull.asUser"], { email: payload.email, external_id: identify.user_id }));
             assert(tReq.body.batch[0].type === "traits");
             assert(_.isEqual(tReq.body.batch[0].body, payload));
             done();
           }, 10);
         });
     });
-  });
+    it("should not Hull.track on screen event by default", (done) => {
+      shipData = {
+        settings: {}
+      };
+      sendRequest({ body: screen, query: config })
+        .expect({ message: "thanks" })
+        .expect(200)
+        .end(() => {
+          setTimeout(() => {
+            const tReq = _.find(requests, { url: "/api/v1/firehose" });
+            assert(!tReq);
+            done();
+          }, 10);
+        });
+    });
 
-  describe("Collecting metric", () => {
+
+  // describe("Collecting metric", () => {
     it("call metric collector", (done) => {
       const metricHandler = sinon.spy();
       sendRequest({ metric: metricHandler })
