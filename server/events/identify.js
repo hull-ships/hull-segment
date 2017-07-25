@@ -20,13 +20,15 @@ function updateUser(hull, user, shipSettings) {
     const { userId, anonymousId, traits = {} } = user;
     const { email } = traits || {};
 
+    const asUser = hull.asUser({ external_id: userId, email, anonymous_id: anonymousId });
+
     if (shipSettings.ignore_segment_userId === true && !email && !anonymousId) {
       const logPayload = { id: user.id, anonymousId, email };
-      hull.logger.info("incoming.user.skip", { reason: "No email address or anonymous ID present when ignoring segment's user ID.", logPayload });
+      asUser.logger.info("incoming.user.skip", { reason: "No email address or anonymous ID present when ignoring segment's user ID.", logPayload });
       return false;
     } else if (!userId && !anonymousId) {
       const logPayload = { id: user.id, userId, anonymousId };
-      hull.logger.info("incoming.user.skip", { reason: "No user ID or anonymous ID present.", logPayload });
+      asUser.logger.info("incoming.user.skip", { reason: "No user ID or anonymous ID present.", logPayload });
       return false;
     }
 
