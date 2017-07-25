@@ -343,17 +343,17 @@ describe("Segment Ship", () => {
         });
     });
 
-
-  // describe("Collecting metric", () => {
-    it("call metric collector", (done) => {
-      const metricHandler = sinon.spy();
-      sendRequest({ metric: metricHandler })
-          .expect({ message: "thanks" })
-          .expect(200)
-          .end(() => {
-            assert(metricHandler.withArgs("request.track").calledOnce);
-            done();
-          });
+    describe("Collecting metric", () => {
+      it("call metric collector", (done) => {
+        const metricHandler = sinon.spy();
+        sendRequest({ metric: metricHandler })
+            .expect({ message: "thanks" })
+            .expect(200)
+            .end(() => {
+              assert(metricHandler.withArgs("request.track").calledOnce);
+              done();
+            });
+      });
     });
   });
 
