@@ -1,4 +1,5 @@
 import Hull from "hull";
+import { Cache } from "hull/lib/infra";
 import express from "express";
 
 import server from "./server";
@@ -46,13 +47,20 @@ if (process.env.LIBRATO_TOKEN && process.env.LIBRATO_USER) {
   };
 }
 
+const cache = new Cache({
+  store: "memory",
+  max: process.env.SHIP_CACHE_MAX || 100,
+  ttl: process.env.SHIP_CACHE_TTL || 60
+});
+
 const app = express();
 const connector = new Hull.Connector({
   hostSecret: options.hostSecret,
   port: options.port,
   clientConfig: {
     firehoseUrl: process.env.OVERRIDE_FIREHOSE_URL
-  }
+  },
+  cache
 });
 options.clientMiddleware = connector.clientMiddleware();
 

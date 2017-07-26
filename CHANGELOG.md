@@ -1,3 +1,6 @@
+## v0.1.4
+- set default ttl for caching
+
 ## v0.1.3
 - hotfix ignore filters on batch
 - hotfix public_id field
