@@ -1,114 +1,88 @@
-# Hull
+# Segment Connector
 
-Hull is the one place to collect, transform, enrich, filter, search and segment customer data in all your tools.
+The Segment Connector enables your team to send and receive user profiles and events with your Segment integrations and track anonymous page visitors.
 
-It helps you creates a single actionable profile and uniform segments that sync to all your tools and make cross-channel, end-to-end personalization easy.
+## Getting Started
 
-# Getting Started
+Go to the Connectors page of your Hull organization, click the button “Add Connector” and click “Install” on the Segment card. After installation, stay on the “Dashboard” tab to grant the Connector access to your Segment workspace. You can use the automatic authorization flow by clicking on the button “Enable with Segment” or manually register Hull as a destination in Segment by following the steps described in [Manually Setup Hull as Destination in Segment](#Manually-Setup-Hull-as-Destination-in-Segment).
+![Getting Started Step 1](./docs/gettingstarted01.png)
 
-Hull receives data from Segment using the **Segment Ship**. Here's how to install it.
+After you have completed the setup of Hull as a destination, move to the tab “Settings” and complete the configuration of the Connector.
+The first decision you have to make is whether you want to configure Hull as a Source in the particular Segment workspace. Enter the Write Key obtained from segment to make Hull a Source or skip this step (see [How to obtain the Write Key from Segment?](#How-to-obtain-the-Write-Key-from-Segment) for details).
+![Getting Started Step 2](./docs/gettingstarted02.png)
 
-Install the Segment Ship on your organization. If you just installed Hull, click on "Add a ship" on the overview page.
-![Home](https://segment.hull.io/home.png)
+Continue your configuration by specifying what data Segment shall receive from Hull as Source by following the steps in the following sections:
 
-Pick the **Segment** Ship from the list.
-![List](https://segment.hull.io/ship_list.png)
+- [Specify the Users who are getting send to Segment](#Specify-the-Users-who-are-getting-send-to-Segment)
+- [Determine the attributes to send to Segment](#Determine-the-attributes-to-send-to-Segment-%28Hull-as-Source%29)
+- [Determine the events to send to Segment](#Determine-the-events-to-send-to-Segment-%28Hull-as-Source%29)
 
-Enter the Segment ship Settings, Copy the API Key
-![Segment](https://segment.hull.io/ship_segment.png)
+Complete your configuration by determining which events the Connector shall handle except from `identify` calls. Identify calls automatically lead to a creation of a new user in Hull or to an update of an existing one. To learn more about the other events the Segment Connector can handle, read the following sections:
 
-Paste it into your integrations page. Alternatively, just click the "Enable with Segment" button.
-![Segment](https://segment.hull.io/segment.png)
+- [Store Page Calls](#Store-Page-Calls)
+- [Store Screen Calls](#Store-Screen-Calls)
+- [Store Group Calls](#Store-Group-Calls)
+- [Handle Groups as Accounts](#Handle-Groups-as-Accounts)
 
-## Tracking Data from anonymous users and Leads
+## Features
 
-Enable **Guest Users** in your Dashboard's **Settings > User Authentication > Login Options**. This will create users for each `identify` call, even those without a User ID which is useful to track Leads.
+The Hull Segment Connector allows your organization to send and receive data from every customer touch point by connecting Hull with your ecosystem of integrated tools in Segment. This enables your organization to build powerful automated data flows across a broad range of applications and teams, e.g. to personalize emails, fuel analytics, empower your helpdesk or drive attribution.
 
-![Guest](https://segment.hull.io/guest.png)
+The Segment connector supports to `create users`, `add traits`, `update traits` and `create events`.
 
-This is disabled by default because it can greatly increase the number of users in your database. When enabled, users will be tracked from their very first visit and action, allowing you to build segments based on complete customer journeys.
+## Specify the Users who are getting send to Segment
 
-## Publishing data back to Segment
+The Segment Connector sends and receives events for all users unless you restrict the Connector to send events only for users belonging to specific segments. This segment restriction does only have an effect for outbound data that is sent from Hull to Segment:
+![Whitelisted Segments](./docs/hullassource01.png)
 
-If you enter your __Segment Write Key__ in the Ship's settings, then Hull will send customer data to Segment. When a user enters or leaves a Hull segment, a new `identify` call with be sent with the following traits :
+## Determine the attributes to send to Segment (Hull as Source)
 
-```js
-analytics.identify(userId, {
-  "hull_segments": ["all","matching","segment","names"],
-  "custom_1": "value_1",
-  "custom_2": "value_2",
-},{
-  "groupId": "user's group Id if he has one"
-})
-```
+You can specify the attributes that are getting send to Segment along with each event in the section “Hull as Source” of the “Settings” tab. By default, only the list of segments a user belongs to are send to Segment:
+![Determine attributes](./docs/hullassource02.png)
+While this setting does not affect your MTU count in Segment, you might want to limit the attributes to the ones the Destinations in Segment can handle. This ensures an efficient data flow with less overhead.
 
-In the Ship settings, you can choose which traits are sent to Segment.com. This lets you send any trait that has been computed or collected from enrichment steps to other tools.
+## Determine the events to send to Segment (Hull as Source)
 
-You can also filter in the Ship Settings the customer segments will be sent back to Segment.com to those matching one or more of your Hull segments.
+The Segment Connector will send all events by default to Segment, but you can customize this behavior to your needs in the section “Hull as Source” of the “Settings” tab:
+![Determine events](./docs/hullassource03.png)
+Restricting events might be useful when you have a limited set of Destinations in Segment which shall receive only particular events. If you are not sure which events your Destinations can handle, please check the respective documentation or just send all events; Destinations will drop events that they cannot handle.
 
-# Features
+**Event forwarding**
+Note: This section is only relevant if Hull is the Source and Destination in the same Segment workspace.
+Let’s explain this setting with a simple example. Assuming you have set up your website “Hull Beta” with analytics.js to track anonymous users and have Hull and Customer.io as Destinations, but use the Write Key in your Segment Connector settings, your workspace in Segment looks like this:
+![Event forwarding](./docs/hullassource04.png)
+Let’s assume you record a page view with the analytics.js library on your homepage and this call gets send to the workspace. Hull will receive this track call as Destination and updates the related user record. If you have “event forwarding” activated, the Hull Segment Connector would send the event back to the Segment workspace. This essentially duplicates the original event and Hull and Customer.io would receive the same event another time. You probably guess by now where this is going, you would create an endless loop of events in this case.
+As a rule of thumb, only use “event forwarding” if you Hull is not Source or Destination in the same segment workspace. As soon as you enter the Write Key into the Segment Connector, make sure that you don’t create an endless loop of events.
 
-Hull supports the `identify`, `page`, `screen`, `track`, and `group` methods.
+## Store Page Calls
 
-Hull stores customer properties and events and makes them available for segmentation in the Dashboard.
+Page calls let you record whenever a user sees a page of your website. If you use analytics.js a page call is included in the snippet by default. If you have a single-page application, you have probably instrumented your router component to fire consecutive page calls. If you activate this setting, all page views will be stored in Hull as events on the user.
+Storing page calls can lead to a lot of events that impact your pricing.
 
-From there you can create and save audiences, transform and enrich customer data with *Ships*.
+## Store Screen Calls
 
+Screen calls let you record whenever a user sees a screen, the equivalent of page calls in your mobile app. If you activate this setting, all screen views will be stored in Hull as events on the user.
+Storing screen calls can lead to a lot of events that impact your pricing.
 
-### Traits
+## Store Group Calls
 
-Every user identified on Segment with a `userId` will be created as a User on Hull. Segment's `userId` will be mapped to Hull's `external_id` field.
+Group API calls associate an individual user with a group—be it a company, organization, account, project, team or whatever you come up with. A user can be in multiple groups in segment, however *Hull will handle only one group*. Hull stores traits received from a Group call in an attribute group named “Group” and all attributes in this group will be overridden on consecutive calls. Hence, the stored attributes in Hull always represent the data from the latest group call. If you have multiple groups, you should not activate this feature.
 
-The following traits will be stored as first level fields on the User object
+## Handle Groups as Accounts
 
-- address
-- created_at
-- description
-- email
-- first_name
-- image
-- last_name
-- name
-- phone
-- picture
-- username
+Hull allows you to store traits received from a Group call as account attributes; if the account is not present, it will create a new one. The Connector uses the `groupId` as unique identifier to determine whether an account exists or not.
+The restrictions for group calls apply here as well, Hull can handle only one linked account, hence consecutive group calls result in the fact that the user will be associated with the account from the last call.
 
-All other attributes from the `identify` call will be stored as [custom traits](http://www.hull.io/docs/references/hull_js/#traits) on Hull.
+## Manually set up Hull as Destination in Segment
 
-### Track
+You can either use the automated flow as described in the [Getting Started](#Getting-Started) section or manually configure Hull as a Destination. Start by copying the API key from the Dashboard of the Segment Connector:
+![Manually set up Hull as Destination Step 1](./docs/gettingstarted01.png)
+Switch to your Segment workspace and add Hull as Destination, if you haven’t done so already:
+![Manually set up Hull as Destination Step 2](./docs/manualdestination01.png)
+Select the Hull Destination and paste the API key obtained from Hull in the field shown below:
+![Manually set up Hull as Destination Step 3](./docs/manualdestination02.png)
 
-Every `track` in Segment will create a new Event on Hull with `"source":"segment"`.
+## How to obtain the Write Key from Segment
 
-### Screen
-
-Every `screen` in Segment will create a new Event on Hull with `"source":"segment"` and `"event":"screen"`.
-
-### Page
-
-Every `page` in Segment will create a new Event on Hull with `"source":"segment"` and `"event":"page"`.
-
-### Group
-
-Group calls in Segment will apply the group's traits as traits on the users that belong to the group.
-
-For instance:
-
-```js
-analytics.group("123", { name: "Wonderful", city: "Paris" });
-```
-
-will add the following traits on all users that belong to the group :
-
-```json
-{
-  "group": {
-    "id": "123",
-    "name": "Wonderful",
-    "city": "Paris"
-  }
-}
-```
-
-Internally, we flatten objects and use '/' as a separator. They're really stored as `traits_group/name`. Our Libraries handle nesting for you when you receive data coming from Hull
-
-__Note: This feature is optional and not enabled by default. You should only enable it if your users can only belong to one group.__
+You can obtain the write key from your segment workspace, by clicking on Sources (1), selecting one source from the list and clicking on Settings (2) of that source. Select API Keys (3) from the menu on the left-side of your screen and copy the Write Key:
+![Obtain the Write Key](./docs/writekey01.png)

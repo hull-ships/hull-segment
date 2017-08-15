@@ -12,3 +12,4 @@ dist
 lib
 
 .vscode
+package-lock.json
