@@ -1,5 +1,11 @@
-## v0.1.5
+## v0.1.6
 - upgrade hull@0.12.2
+
+## v0.1.5
+- optionally use redis store for internal caching
+
+## v0.1.4
+- set default ttl for caching
 
 ## v0.1.3
 - hotfix ignore filters on batch
