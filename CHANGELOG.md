@@ -1,3 +1,6 @@
+## v0.1.5
+- upgrade hull@0.12.2
+
 ## v0.1.3
 - hotfix ignore filters on batch
 - hotfix public_id field
