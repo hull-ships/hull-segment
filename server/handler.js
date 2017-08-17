@@ -119,12 +119,6 @@ module.exports = function SegmentHandler(options = {}) {
   app.use(parseRequest); // parse segment request, early return if invalid.
   app.use(authTokenMiddleware); // retreives Hull config and stores it in the right place.
   app.use(clientMiddleware);
-  app.use((req, res, next) => {
-    if (!req.hull.ship || !req.hull.ship.settings || !req.hull.ship.private_settings) {
-      return res.status(401).json({ message: "cannot authorize this request" });
-    }
-    return next();
-  });
   app.use(processHandlers(_handlers, { Hull, onMetric }));
   app.use((req, res) => {
     res.json({ message: "thanks" });
