@@ -22,7 +22,6 @@
       "format"     : "string"
     }
   ],
-  "settings": [],
   "private_settings": [
     {
       "name": "sync_out_info",
