@@ -1,10 +1,12 @@
 const EMAIL_REGEXP = /([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})/i;
 
 /**
- * @param  {Object} hull
- * @param  {Object} user
- * @param  {Object} settings
- * @return {Object} additionalClaims
+ * Prepares a scoped hull-client-node to provided user object
+ * @param  {Object} hull hull client instance
+ * @param  {Object} user hull user object
+ * @param  {Object} settings connector settings - req.hull.ship
+ * @param  {Object} additionalClaims optional claims
+ * @return {Object} scoped client instance
  */
 export default function scope(hull, user = {}, settings, additionalClaims = {}) {
   const { hullId, userId, anonymousId, traits = {} } = user;
