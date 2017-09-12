@@ -1,6 +1,6 @@
 ## v0.1.7
 - uprade hull@0.12.5
-- adds additional claim `active` to identify and track calls
+- adds `active` claim to identify and track handlers to activate fast-lane
 
 ## v0.1.6
 - upgrade hull@0.12.2
