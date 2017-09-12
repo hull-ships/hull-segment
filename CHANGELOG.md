@@ -1,3 +1,7 @@
+## v0.1.7
+- uprade hull@0.12.5
+- adds additional claim `active` to identify and track calls
+
 ## v0.1.6
 - upgrade hull@0.12.2
 - upgrade documentation and settings structure
