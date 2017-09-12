@@ -32,7 +32,7 @@ function updateUser(hull, user, shipSettings) {
       return false;
     }
 
-    return scoped(hull, user, shipSettings).traits(traits).then(
+    return scoped(hull, user, shipSettings, { active: true }).traits(traits).then(
       (/* response*/) => {
         return { traits };
       },
