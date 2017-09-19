@@ -1,3 +1,6 @@
+## v0.1.7
+- upgrade hull@0.12.6
+
 ## v0.1.6
 - upgrade hull@0.12.2
 - upgrade documentation and settings structure
