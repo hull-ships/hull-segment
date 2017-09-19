@@ -42,8 +42,8 @@ module.exports = function server(app, options = {}) {
     return notifHandler({
       userHandlerOptions: {
         groupTraits: false,
-        maxSize: 1,
-        maxTime: 1
+        maxSize: parseInt(process.env.MAX_SIZE) || 100,
+        maxTime: parseInt(process.env.MAX_TIME) || 1000
       },
       handlers: {
         "user:update": (ctx, messages = []) => {

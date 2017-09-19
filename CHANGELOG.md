@@ -1,3 +1,6 @@
+## v0.1.8
+- set correct maxSize and maxTime values for notifHandler
+
 ## v0.1.7
 - upgrade hull@0.12.6
 
