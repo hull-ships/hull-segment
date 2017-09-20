@@ -78,12 +78,6 @@
       "description" : "ONLY enable this feature when the Write Key is from a different workspace. Read the manual before making any changes; this can result in an endless loop of events.",
       "type" : "boolean",
       "default" : false
-    },
-    {
-      "name": "sync_in_info",
-      "title": "Incoming Data (Hull as Destination)",
-      "format": "title",
-      "type": "string"
     }
   ],
   "settings": [
@@ -102,6 +96,12 @@
       "enum" : [ "id", "external_id" ],
       "default" : "external_id",
       "format" : "hidden"
+    },
+    {
+      "name": "sync_in_info",
+      "title": "Incoming Data (Hull as Destination)",
+      "format": "title",
+      "type": "string"
     },
     {
       "name" : "handle_pages",
