@@ -7,7 +7,7 @@
   "ui": false,
   "admin" : "admin.html",
   "readme" : "readme.md",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "deployment_settings":[
     {
       "name"       : "_selector",
@@ -35,13 +35,6 @@
       "headerTemplate": "**Users can only be send to segment.com when at least one identifier is present, this can be either the `External ID` or one or more `Anonymous IDs`.**",
       "format": "information",
       "type": "string"
-    },
-    {
-      "name":"write_key",
-      "title": "Write Key to send data to Segment.com API",
-      "description":"Find it under Settings > API Keys > Write Key in your Segment.com workspace.",
-      "type": "string",
-      "format": "text"
     },
     {
       "name": "synchronized_segments",
@@ -85,6 +78,15 @@
       "description" : "ONLY enable this feature when the Write Key is from a different workspace. Read the manual before making any changes; this can result in an endless loop of events.",
       "type" : "boolean",
       "default" : false
+    }
+  ],
+  "settings": [
+    {
+      "name":"write_key",
+      "title": "Write Key to send data to Segment.com API",
+      "description":"Find it under Settings > API Keys > Write Key in your Segment.com workspace.",
+      "type": "string",
+      "format": "text"
     },
     {
       "name" : "public_id_field",

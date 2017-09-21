@@ -1,3 +1,8 @@
+## v0.1.8
+- set correct maxSize and maxTime values for notifHandler
+- adds `active` claim to identify and track handlers to activate fast-lane
+- reverts manifest.json settings definition to correct structure
+
 ## v0.1.7
 - upgrade hull@0.12.6
 
