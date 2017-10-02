@@ -15,7 +15,7 @@ const IGNORED_TRAITS = [
   "visitToken"
 ];
 
-function updateUser(hull, user, shipSettings) {
+function updateUser(hull, user, shipSettings, active) {
   try {
     const { userId, anonymousId, traits = {} } = user;
     const { email } = traits || {};
@@ -32,8 +32,8 @@ function updateUser(hull, user, shipSettings) {
       return false;
     }
 
-    return scoped(hull, user, shipSettings, { active: true }).traits(traits).then(
-      (/* response*/) => {
+    return scoped(hull, user, shipSettings, { active }).traits(traits).then(
+      (/* response */) => {
         return { traits };
       },
       (error) => {
@@ -47,7 +47,8 @@ function updateUser(hull, user, shipSettings) {
 }
 
 export default function handleIdentify(payload, { hull, metric, ship }) {
-  const { traits, userId, anonymousId, integrations = {} } = payload;
+  const { context, traits, userId, anonymousId, integrations = {} } = payload;
+  const { active = false } = context || {};
   const user = reduce((traits || {}), (u, v, k) => {
     if (v == null) return u;
     if (ALIASED_FIELDS[k.toLowerCase()]) {
@@ -63,7 +64,7 @@ export default function handleIdentify(payload, { hull, metric, ship }) {
     delete user.userId;
   }
   if (!isEmpty(user.traits)) {
-    const updating = updateUser(hull, user, ship.settings);
+    const updating = updateUser(hull, user, ship.settings, active);
 
     updating.then(
       ({ t = {} }) => {

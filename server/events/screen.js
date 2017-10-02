@@ -6,7 +6,10 @@ export default function handleScreen(payload = {}, context = {}) {
   if (!handle_screens) { return false; }
 
   const { properties } = payload;
-  properties.name = payload.name;
+  if (!properties.name && payload.name) {
+    properties.name = payload.name;
+  }
+
 
   const screen = {
     ...payload,
