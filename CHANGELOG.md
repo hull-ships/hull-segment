@@ -1,3 +1,6 @@
+## v0.1.9
+- adds `active` claim only if active flag is set from segment context
+
 ## v0.1.8
 - set correct maxSize and maxTime values for notifHandler
 - adds `active` claim to identify and track handlers to activate fast-lane

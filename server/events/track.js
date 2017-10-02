@@ -28,7 +28,7 @@ export default function handleTrack(payload, { hull, metric, ship }) {
     ip,
     latitude,
     longitude,
-    active
+    active: active || context.active
   }, (p, v, k) => {
     if (v !== undefined) {
       p[k] = v;
@@ -41,7 +41,7 @@ export default function handleTrack(payload, { hull, metric, ship }) {
     delete payload.userId;
   }
 
-  const scopedUser = scoped(hull, payload, ship.settings, { active: true });
+  const scopedUser = scoped(hull, payload, ship.settings);
   return scopedUser.track(event, properties, trackContext).then(
     (result) => {
       scopedUser.logger.info("incoming.track.success", { trackContext, event, properties });

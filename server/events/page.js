@@ -6,7 +6,10 @@ export default function handlePage(payload = {}, context = {}) {
   if (!handle_pages) { return false; }
 
   const { properties } = payload;
-  properties.name = payload.name;
+  if (!properties.name && payload.name) {
+    properties.name = payload.name;
+  }
+
 
   const page = {
     ...payload,

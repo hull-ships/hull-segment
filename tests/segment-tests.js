@@ -36,8 +36,6 @@ const { track, identify, page, screen } = require("./fixtures");
 // };
 //
 
-function noop() {}
-
 const hostSecret = "shuut";
 const hullSecret = "hullSecret";
 
@@ -62,27 +60,6 @@ function sendRequest({ query, body, headers, metric }) {
     .send(body || track);
 }
 
-function mockHullFactory(postSpy, getResponse) {
-  return function MockHull() {
-    this.as = () => this;
-    this.asUser = () => this;
-    this.get = () => Promise.resolve(getResponse);
-    this.post = (path, params) => {
-      postSpy(path, params);
-      return Promise.resolve();
-    };
-    this.traits = (traits) => {
-      postSpy("me/traits", traits);
-      return Promise.resolve();
-    };
-    this.track = (event, params, context) => {
-      postSpy("/t", event, params, context);
-      return Promise.resolve();
-    };
-    this.logger = { info: noop, debug: noop };
-    this.configuration = () => config;
-  };
-}
 
 describe("Segment Ship", () => {
   let requests = [];
@@ -249,6 +226,7 @@ describe("Segment Ship", () => {
           setTimeout(() => {
             const tReq = _.find(requests, { url: "/api/v1/firehose" });
             assert(tReq.body.batch[0].type === "track");
+            assert(tReq.body.batch[0].body.active === true);
             assert(tReq.body.batch[0].body.event === "screen");
             done();
           }, 10);
@@ -321,12 +299,63 @@ describe("Segment Ship", () => {
             const tReq = _.find(requests, { url: "/api/v1/firehose" });
             const tokenClaims = jwt.decode(tReq.body.batch[0].headers["Hull-Access-Token"], hullSecret);
             assert(_.isEqual(tokenClaims["io.hull.asUser"], { email: payload.email, external_id: identify.user_id }));
+            const claims = jwt.decode(tReq.body.batch[0].headers["Hull-Access-Token"], null, true);
+            assert(claims["io.hull.active"] === false);
             assert(tReq.body.batch[0].type === "traits");
             assert(_.isEqual(tReq.body.batch[0].body, payload));
             done();
           }, 10);
         });
     });
+
+    it("call Hull.traits on identify event", (done) => {
+      shipData = {
+        settings: {}
+      };
+      const traits = {
+        id: "12",
+        visitToken: "boom",
+        firstname: "James",
+        lastname: "Brown",
+        createdat: "2016-05-02T10:39:17.812Z",
+        email: "james@brown.com",
+        coconuts: 32
+      };
+
+      const body = {
+        ...identify,
+        context: {
+          ...identify.context,
+          active: true
+        },
+        traits
+      };
+
+      sendRequest({ body, query: config })
+        .expect(200)
+        .expect({ message: "thanks" })
+        .end(() => {
+          const payload = {
+            first_name: "James",
+            last_name: "Brown",
+            created_at: "2016-05-02T10:39:17.812Z",
+            email: "james@brown.com",
+            coconuts: 32
+          };
+          setTimeout(() => {
+            const tReq = _.find(requests, { url: "/api/v1/firehose" });
+            const tokenClaims = jwt.decode(tReq.body.batch[0].headers["Hull-Access-Token"], hullSecret);
+            assert(_.isEqual(tokenClaims["io.hull.asUser"], { email: payload.email, external_id: identify.user_id }));
+            const claims = jwt.decode(tReq.body.batch[0].headers["Hull-Access-Token"], null, true);
+            assert(claims["io.hull.active"] === true);
+            assert(tReq.body.batch[0].type === "traits");
+            assert(_.isEqual(tReq.body.batch[0].body, payload));
+            done();
+          }, 10);
+        });
+    });
+
+
     it("should not Hull.track on screen event by default", (done) => {
       shipData = {
         settings: {}
