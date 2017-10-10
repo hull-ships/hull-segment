@@ -1,3 +1,6 @@
+## v0.1.10
+- add support for outgoing group calls with account attributes
+
 ## v0.1.9
 - adds `active` claim only if active flag is set from segment context
 
