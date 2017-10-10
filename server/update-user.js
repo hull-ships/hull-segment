@@ -2,7 +2,7 @@ import _ from "lodash";
 
 export default function updateUserFactory(analyticsClient) {
   return function updateUser({ message = {} }, { ship = {}, hull = {}, ignoreFilters = false }) {
-    const { user = {}, segments = [], events = [] } = message;
+    const { account = {}, user = {}, segments = [], events = [] } = message;
 
     // Empty payload ?
     if (!user.id || !ship.id) {
@@ -59,7 +59,7 @@ export default function updateUserFactory(analyticsClient) {
     const groupId = user["traits_group/id"];
 
     const publicAccountIdField = public_account_id_field === "id" ? "id" : "external_id";
-    const accountId = user.account && user.account[publicAccountIdField];
+    const accountId = account && account[publicAccountIdField];
 
     // We have no identifier for the user, we have to skip
     if (!userId && !anonymousId) {
@@ -98,14 +98,18 @@ export default function updateUserFactory(analyticsClient) {
           analytics.group({ groupId, anonymousId, userId, traits: groupTraits, context, integrations });
         }
       } else if (handle_accounts && accountId) {
-        const accountTraits = synchronized_account_properties.reduce((props, prop) => {
-          props[prop.replace("/", "_")] = user.account[prop];
-          return props;
-        });
+        const accountTraits = synchronized_account_properties
+          .map(k => k.replace(/^account\./, ""))
+          .reduce((props, prop) => {
+            props[prop.replace("/", "_")] = account[prop];
+            return props;
+          }, {});
+
         if (!_.isEmpty(accountTraits)) {
-          hull.logger.debug("group.send", { ...loggingProperties, groupId: accountId, traits: accountTraits, context });
+          hull.logger.debug("group.send", { groupId: accountId, traits: accountTraits, context });
           analytics.group({ groupId: accountId, anonymousId, userId, traits: accountTraits, context, integrations });
         }
+
         hull.logger.info("outgoing.account.success", { groupId: accountId, traits: accountTraits, context });
       }
     } catch (err) {
