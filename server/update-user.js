@@ -2,7 +2,8 @@ import _ from "lodash";
 
 export default function updateUserFactory(analyticsClient) {
   return function updateUser({ message = {} }, { ship = {}, hull = {}, ignoreFilters = false }) {
-    const { account = {}, user = {}, segments = [], events = [] } = message;
+    const { user = {}, segments = [], events = [] } = message;
+    const account = message.account || user.account;
 
     // Empty payload ?
     if (!user.id || !ship.id) {
