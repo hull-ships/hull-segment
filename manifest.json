@@ -65,6 +65,16 @@
       "default": []
     },
     {
+      "name": "synchronized_account_properties",
+      "title": "Send Account Attributes to Segment.com",
+      "type": "array",
+      "format": "accountTrait",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    {
       "name": "send_events",
       "title": "Send the following events for whitelisted users",
       "description" : "Sends all events, if not specified.",
@@ -131,6 +141,15 @@
       "headerTemplate": "Group calls associate an individual user with a group—be it a company, organization, account, project, team or whatever you come up with. A user can be in multiple groups in segment, however **Hull will handle only one group**. Consecutive group calls will overwrite the attributes in Hull. For further information, please read the Instructions.",
       "format": "information",
       "title": "-- Group calls from Segment.com --"
+    },
+    {
+      "name" : "public_account_id_field",
+      "title" : "Public Account ID Field",
+      "description" : "Account field to use as the groupId for data sent to segment",
+      "type" : "string",
+      "enum" : [ "id", "external_id" ],
+      "default" : "external_id",
+      "format" : "hidden"
     },
     {
       "name" : "handle_groups",
