@@ -1,7 +1,7 @@
 {
   "name": "hull-segment",
   "description": "Install Segment in your site",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "homepage": "https://github.com/hull-ships/hull-segment",
   "license": "MIT",
   "main": "dist/ship.js",
@@ -11,9 +11,8 @@
     "url": "https://github.com/hull"
   },
   "engines": {
-    "node": "6.11.1",
-    "npm": "3.x",
-    "yarn": "0.27.5"
+    "node": "6.x",
+    "npm": "3.x"
   },
   "repository": {
     "type": "git",
