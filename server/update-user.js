@@ -111,7 +111,7 @@ export default function updateUserFactory(analyticsClient) {
           analytics.group({ groupId: accountId, anonymousId, userId, traits: accountTraits, context, integrations });
         }
 
-        hull.logger.info("outgoing.account.success", { groupId: accountId, traits: accountTraits, context });
+        asUser.account({ external_id: accountId }).logger.info("outgoing.account.success", { groupId: accountId, traits: accountTraits, context });
       }
     } catch (err) {
       console.warn("Error processing group update", err);
