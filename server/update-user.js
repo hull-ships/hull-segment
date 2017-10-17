@@ -14,12 +14,14 @@ export default function updateUserFactory(analyticsClient) {
 
     // Custom properties to be synchronized
     const {
-      synchronized_account_properties = [],
       synchronized_properties = [],
       synchronized_segments = [],
       forward_events = false,
       send_events = []
     } = ship.private_settings || {};
+    const {
+      synchronized_account_properties = []
+    } = ship.settings || {};
 
     // Build traits that will be sent to Segment
     // Use hull_segments by default
