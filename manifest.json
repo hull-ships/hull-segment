@@ -65,16 +65,6 @@
       "default": []
     },
     {
-      "name": "synchronized_account_properties",
-      "title": "Send Account Attributes to Segment.com",
-      "type": "array",
-      "format": "accountTrait",
-      "items": {
-        "type": "string"
-      },
-      "default": []
-    },
-    {
       "name": "send_events",
       "title": "Send the following events for whitelisted users",
       "description" : "Sends all events, if not specified.",
@@ -152,18 +142,35 @@
       "format" : "hidden"
     },
     {
+      "name": "group_call_info",
+      "title": "Accounts & Segment groups",
+      "format": "title",
+      "type": "string"
+    },
+    {
       "name" : "handle_groups",
       "title" : "Handle Groups",
       "description" : "Handle group attributes as user traits, prefixed with 'group/'",
       "type" : "boolean",
-      "default" : false
+      "default" : false,
+      "format": "hidden"
     },
     {
       "name" : "handle_accounts",
-      "title" : "Handle Accounts",
-      "description" : "Handle group attributes as account traits",
+      "title" : "Enable Accounts",
+      "description" : "Treat incoming group calls ",
       "type" : "boolean",
       "default" : false
+    },
+    {
+      "name": "synchronized_account_properties",
+      "title": "Send Account Attributes to Segment.com",
+      "type": "array",
+      "format": "accountTrait",
+      "items": {
+        "type": "string"
+      },
+      "default": []
     }
   ],
   "resources": [],

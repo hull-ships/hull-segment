@@ -21,7 +21,6 @@ Complete your configuration by determining which events the Connector shall hand
 
 - [Store Page Calls](#Store-Page-Calls)
 - [Store Screen Calls](#Store-Screen-Calls)
-- [Store Group Calls](#Store-Group-Calls)
 - [Handle Groups as Accounts](#Handle-Groups-as-Accounts)
 
 ## Features
@@ -64,14 +63,10 @@ Storing page calls can lead to a lot of events that impact your pricing.
 Screen calls let you record whenever a user sees a screen, the equivalent of page calls in your mobile app. If you activate this setting, all screen views will be stored in Hull as events on the user.
 Storing screen calls can lead to a lot of events that impact your pricing.
 
-## Store Group Calls
-
-Group API calls associate an individual user with a group—be it a company, organization, account, project, team or whatever you come up with. A user can be in multiple groups in segment, however *Hull will handle only one group*. Hull stores traits received from a Group call in an attribute group named “Group” and all attributes in this group will be overridden on consecutive calls. Hence, the stored attributes in Hull always represent the data from the latest group call. If you have multiple groups, you should not activate this feature.
-
 ## Handle Groups as Accounts
 
-Hull allows you to store traits received from a Group call as account attributes; if the account is not present, it will create a new one. The Connector uses the `groupId` as unique identifier to determine whether an account exists or not.
-The restrictions for group calls apply here as well, Hull can handle only one linked account, hence consecutive group calls result in the fact that the user will be associated with the account from the last call.
+Hull allows you to store attributes received from a Group call as account attributes; if the account is not present, it will create a new one and link it to the user. The Connector uses the `groupId` as unique identifier to determine whether an account exists or not.
+In Segment a user can be in multiple groups in segment, however Hull *will handle only one group*. This means, Hull will handle only one linked account, hence consecutive group calls result in the fact that the user will be associated with the account from the last call. If you have multiple groups, you should not activate this feature.
 
 ## Manually set up Hull as Destination in Segment
 
