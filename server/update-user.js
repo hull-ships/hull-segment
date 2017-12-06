@@ -142,6 +142,7 @@ export default function updateUserFactory(analyticsClient) {
 
         let track = {
           anonymousId: e.anonymous_id || anonymousId,
+          messageId: e.event_id,
           timestamp: new Date(e.created_at),
           userId,
           properties,
