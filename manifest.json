@@ -7,7 +7,7 @@
   "ui": false,
   "admin" : "admin.html",
   "readme" : "readme.md",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "deployment_settings":[
     {
       "name"       : "_selector",

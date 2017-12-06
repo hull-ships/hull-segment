@@ -1,3 +1,7 @@
+## v0.1.11
+- add tooling for CircleCI v2
+- pass along the `event_id` as `message_id` so Segment can dedupe events
+
 ## v0.1.10
 - add support for outgoing group calls with account attributes
 
