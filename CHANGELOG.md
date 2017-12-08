@@ -1,3 +1,7 @@
+## v0.1.12
+- hotfix error reporting
+- upgrade hull-node to v0.12.8
+
 ## v0.1.11
 - add tooling for CircleCI v2
 - pass along the `event_id` as `message_id` so Segment can dedupe events
