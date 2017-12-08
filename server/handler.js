@@ -81,7 +81,7 @@ function processHandlers(handlers, { Hull, onMetric }) {
 
         Promise.all(processors).then(() => {
           next();
-        }, (err) => {
+        }, (err = {}) => {
           err.status = (err && err.status) || 500;
           return next(err);
         });
