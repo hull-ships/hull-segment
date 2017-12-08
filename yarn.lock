@@ -2673,9 +2673,9 @@ hull-connector-tester@^0.0.1:
   dependencies:
     circle-github-bot "^0.4.0"
 
-hull@0.12.6:
-  version "0.12.6"
-  resolved "https://registry.yarnpkg.com/hull/-/hull-0.12.6.tgz#a6ee2fcfc4a6f4cd89dd122534901c3082453f05"
+hull@0.12.8:
+  version "0.12.8"
+  resolved "https://registry.yarnpkg.com/hull/-/hull-0.12.8.tgz#70c3efa522bec8b39ce9898ab3d6969445cc64cd"
   dependencies:
     JSONStream "^1.1.2"
     aws-sdk "^2.81.0"
