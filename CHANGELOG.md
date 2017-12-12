@@ -1,3 +1,6 @@
+## v0.1.14
+- upgrade hull-node to v0.13.9
+
 ## v0.1.13
 - hotfix error
 
