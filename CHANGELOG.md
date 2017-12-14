@@ -1,3 +1,6 @@
+## v0.1.15
+- hotfix account properties not sent in User when listed there
+
 ## v0.1.14
 - upgrade hull-node to v0.13.9
 
