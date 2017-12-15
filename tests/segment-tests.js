@@ -145,7 +145,6 @@ describe("Segment Ship", () => {
     });
   });
 
-
   describe("Ship not found", () => {
     it("should return 401 if ship is not found", (done) => {
       sendRequest({ body: track, query: { ...config, ship: "not_found" } })
@@ -161,7 +160,6 @@ describe("Segment Ship", () => {
           .expect(501, done);
     });
   });
-
 
   describe("Handling events", () => {
     it("call Hull.track on track event", (done) => {
@@ -190,7 +188,7 @@ describe("Segment Ship", () => {
           }, 10);
         });
     });
-    it("should not Hull.track on page event by default", (done) => {
+    it("should Hull.track on page event by default", (done) => {
       shipData = {
         settings: {}
       };
@@ -200,7 +198,7 @@ describe("Segment Ship", () => {
         .end(() => {
           setTimeout(() => {
             const tReq = _.find(requests, { url: "/api/v1/firehose" });
-            assert(!tReq);
+            assert(tReq);
             done();
           }, 10);
         });
@@ -356,7 +354,7 @@ describe("Segment Ship", () => {
     });
 
 
-    it("should not Hull.track on screen event by default", (done) => {
+    it("should Hull.track on screen event by default", (done) => {
       shipData = {
         settings: {}
       };
@@ -366,7 +364,7 @@ describe("Segment Ship", () => {
         .end(() => {
           setTimeout(() => {
             const tReq = _.find(requests, { url: "/api/v1/firehose" });
-            assert(!tReq);
+            assert(tReq);
             done();
           }, 10);
         });

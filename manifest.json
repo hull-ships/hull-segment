@@ -30,16 +30,9 @@
       "type": "string"
     },
     {
-      "name": "sending_hero",
-      "title": "Important Note",
-      "headerTemplate": "**Users are only sent to segment.com when at least one identifier is present, this can be either the `External ID` or one or more `Anonymous IDs`.**",
-      "format": "information",
-      "type": "string"
-    },
-    {
       "name": "synchronized_segments",
-      "title": "Filter Users to send",
-      "description": "*By default all users are sent to Segment.com*",
+      "title": "Users to send",
+      "description": "*By default all users are sent to Segment.com. If you specify segments, only those will be sent*",
       "type": "array",
       "format": "segment",
       "items": {
@@ -48,34 +41,34 @@
       "default": []
     },
     {
+      "name": "send_events",
+      "title": "Events to send",
+      "description" : "*By Default, all events are sent to Segment.com as `analytics.track()` calls. If you specify events above, only those will be sent.*",
+      "type": "array",
+      "format": "event",
+      "default": []
+    },
+    {
       "name": "synchronized_properties",
-      "title": "Attributes to send in analytics.identify() calls",
-      "description": "*By default, only these User attributes are sent to Segment:* <br>- `email`<br>- `external_id`<br/>- `anonymous_id`<br>- User's Segments as `hull_segments`.",
+      "title": "Attributes to send in Users",
+      "description": "*By default, only `email` and `hull_segments` are sent to Segment.com in `analytics.identify()` calls*",
       "type": "array",
       "format": "trait",
       "items": {
         "type": "string"
       },
-      "default": []
+      "default": ["email"]
     },
     {
       "name": "synchronized_account_properties",
-      "title": "Attributes to send in analytics.group() calls",
-      "description": "*By default, nothing is sent to Segment.com*",
+      "title": "Attributes to send in Accounts",
+      "description": "*By default, only `domain` is sent to Segment.com in `analytics.group()` calls*",
       "type": "array",
       "format": "accountTrait",
       "items": {
         "type": "string"
       },
-      "default": []
-    },
-    {
-      "name": "send_events",
-      "title": "Events to send as analytics.track() calls",
-      "description" : "*By Default, all events are sent to Segment. If you specify events above, only those will be sent.*",
-      "type": "array",
-      "format": "event",
-      "default": []
+      "default": ["domain"]
     },
     {
       "name" : "forward_events",
@@ -101,6 +94,13 @@
       "enum" : [ "id", "external_id" ],
       "default" : "external_id",
       "format" : "hidden"
+    },
+    {
+      "name": "sending_hero",
+      "title": "Important Note",
+      "headerTemplate": "**Users are only sent to segment.com when at least one identifier is present, this can be either the `External ID` or one or more `Anonymous IDs`.**",
+      "format": "information",
+      "type": "string"
     },
     {
       "name": "sync_in_info",
