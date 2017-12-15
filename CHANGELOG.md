@@ -1,5 +1,8 @@
 ## v0.1.15
 - hotfix account properties not sent in User when listed there
+- cleanup Settings Screen
+- change account, page and screen tracking defaults to `true`
+- 
 
 ## v0.1.14
 - upgrade hull-node to v0.13.9
