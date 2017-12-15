@@ -16,12 +16,10 @@ export default function updateUserFactory(analyticsClient) {
     const {
       synchronized_properties = [],
       synchronized_segments = [],
+      synchronized_account_properties = [],
       forward_events = false,
       send_events = []
     } = ship.private_settings || {};
-    const {
-      synchronized_account_properties = []
-    } = ship.settings || {};
 
     // Build traits that will be sent to Segment
     // Use hull_segments by default
