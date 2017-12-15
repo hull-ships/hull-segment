@@ -25,20 +25,21 @@
   "private_settings": [
     {
       "name": "sync_out_info",
-      "title": "Outgoing Data (Hull as Source)",
+      "title": "Hull ➞ Segment",
       "format": "title",
       "type": "string"
     },
     {
       "name": "sending_hero",
       "title": "Important Note",
-      "headerTemplate": "**Users can only be send to segment.com when at least one identifier is present, this can be either the `External ID` or one or more `Anonymous IDs`.**",
+      "headerTemplate": "**Users are only sent to segment.com when at least one identifier is present, this can be either the `External ID` or one or more `Anonymous IDs`.**",
       "format": "information",
       "type": "string"
     },
     {
       "name": "synchronized_segments",
-      "title": "Send users to Segment.com when belonging to one of these segments",
+      "title": "Filter Users to send",
+      "description": "*By default all users are sent to Segment.com*",
       "type": "array",
       "format": "segment",
       "items": {
@@ -47,16 +48,9 @@
       "default": []
     },
     {
-      "name": "synchronized_segments_hero",
-      "type": "string",
-      "headerTemplate": "The above list of segments is a whitelist. **By default all users are sent to Segment.com* with the attributes specified below.<br>As soon as you specify one or more segments, only users belonging to one these segments and associated events will be sent to Segment.com.",
-      "format": "information",
-      "title": "Whitelisted Segments"
-    },
-    {
       "name": "synchronized_properties",
-      "title": "Send the following attributes as traits",
-      "description": "Sends the list of segments as trait `hull_segments` by default, plus any additional attributes specified here.",
+      "title": "Attributes to send in analytics.identify() calls",
+      "description": "*By default, only these User attributes are sent to Segment:* <br>- `email`<br>- `external_id`<br/>- `anonymous_id`<br>- User's Segments as `hull_segments`.",
       "type": "array",
       "format": "trait",
       "items": {
@@ -65,12 +59,23 @@
       "default": []
     },
     {
+      "name": "synchronized_account_properties",
+      "title": "Attributes to send in analytics.group() calls",
+      "description": "*By default, nothing is sent to Segment.com*",
+      "type": "array",
+      "format": "accountTrait",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    {
       "name": "send_events",
-      "title": "Send the following events for whitelisted users",
-      "description" : "Sends all events, if not specified.",
+      "title": "Events to send as analytics.track() calls",
+      "description" : "*By Default, all events are sent to Segment. If you specify events above, only those will be sent.*",
       "type": "array",
       "format": "event",
-      "default": ["Entered segment", "Left segment"]
+      "default": []
     },
     {
       "name" : "forward_events",
@@ -99,23 +104,30 @@
     },
     {
       "name": "sync_in_info",
-      "title": "Incoming Data (Hull as Destination)",
+      "title": "Segment ➞ Hull",
       "format": "title",
       "type": "string"
     },
     {
       "name" : "handle_pages",
-      "title" : "Store Page Calls",
-      "description" : "Record whenever a user sees a page of your website. This can result in a lot of events which affect your pricing.",
+      "title" : "Handle Page Calls",
+      "description" : "Record whenever a user sees a page of your website.",
       "type" : "boolean",
-      "default" : false
+      "default" : true
     },
     {
       "name" : "handle_screens",
-      "title" : "Store Screen Calls",
-      "description" : "Screen calls let you record whenever a user sees a screen on a mobile app. This can result in a lot of events which affect your pricing.",
+      "title" : "Handle Screen Calls",
+      "description" : "Screen calls let you record whenever a user sees a screen on a mobile app.",
       "type" : "boolean",
-      "default" : false
+      "default" : true
+    },
+    {
+      "name" : "handle_accounts",
+      "title" : "Handle Group Calls",
+      "description" : "Handle incoming group calls. Group calls associate an individual user with a group—be it a company, organization, account, project, team or whatever you come up with. A user can be in multiple groups in segment, however **Hull will handle only one group**. Consecutive group calls will overwrite the attributes in Hull. For further information, please read the Instructions.",
+      "type" : "boolean",
+      "default" : true
     },
     {
       "name": "ignore_segment_userId",
@@ -124,13 +136,6 @@
       "type": "boolean",
       "default": false,
       "format": "hidden"
-    },
-    {
-      "name": "group_calls_hero",
-      "type": "string",
-      "headerTemplate": "Group calls associate an individual user with a group—be it a company, organization, account, project, team or whatever you come up with. A user can be in multiple groups in segment, however **Hull will handle only one group**. Consecutive group calls will overwrite the attributes in Hull. For further information, please read the Instructions.",
-      "format": "information",
-      "title": "-- Group calls from Segment.com --"
     },
     {
       "name" : "public_account_id_field",
@@ -142,35 +147,12 @@
       "format" : "hidden"
     },
     {
-      "name": "group_call_info",
-      "title": "Accounts & Segment groups",
-      "format": "title",
-      "type": "string"
-    },
-    {
       "name" : "handle_groups",
       "title" : "Handle Groups",
       "description" : "Handle group attributes as user traits, prefixed with 'group/'",
       "type" : "boolean",
       "default" : false,
       "format": "hidden"
-    },
-    {
-      "name" : "handle_accounts",
-      "title" : "Enable Accounts",
-      "description" : "Treat incoming group calls ",
-      "type" : "boolean",
-      "default" : false
-    },
-    {
-      "name": "synchronized_account_properties",
-      "title": "Send Account Attributes to Segment.com",
-      "type": "array",
-      "format": "accountTrait",
-      "items": {
-        "type": "string"
-      },
-      "default": []
     }
   ],
   "resources": [],
