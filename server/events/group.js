@@ -206,7 +206,7 @@ function handleGroupNew(event, { hull }) {
 
 export default function handleGroup(event, { hull, ship, metric }) {
   const { handle_accounts } = ship.settings;
-  if (handle_accounts !== undefined && handle_accounts) {
+  if (handle_accounts === true) {
     return handleGroupNew(event, { hull });
   }
   return handleGroupOld(event, { hull, ship, metric });

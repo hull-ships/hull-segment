@@ -3,7 +3,7 @@ import track from "./track";
 export default function handlePage(payload = {}, context = {}) {
   const { ship = {} } = context;
   const { handle_pages } = ship.settings || {};
-  if (handle_pages !== undefined && !handle_pages) { return false; }
+  if (handle_pages === false ) { return false; }
 
   const { properties } = payload;
   if (!properties.name && payload.name) {

@@ -127,7 +127,7 @@
       "title" : "Handle Group Calls",
       "description" : "Handle incoming group calls. Group calls associate an individual user with a group—be it a company, organization, account, project, team or whatever you come up with. A user can be in multiple groups in segment, however **Hull will handle only one group**. Consecutive group calls will overwrite the attributes in Hull. For further information, please read the Instructions.",
       "type" : "boolean",
-      "default" : true
+      "default" : false
     },
     {
       "name": "ignore_segment_userId",

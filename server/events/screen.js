@@ -3,7 +3,7 @@ import track from "./track";
 export default function handleScreen(payload = {}, context = {}) {
   const { ship = {} } = context;
   const { handle_screens } = ship.settings || {};
-  if (handle_screens !== undefined && !handle_screens) { return false; }
+  if (handle_screens === false) { return false; }
 
   const { properties } = payload;
   if (!properties.name && payload.name) {
