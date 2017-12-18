@@ -16,19 +16,22 @@ export default function updateUserFactory(analyticsClient) {
     const {
       synchronized_properties = [],
       synchronized_segments = [],
+      synchronized_account_properties = [],
       forward_events = false,
       send_events = []
     } = ship.private_settings || {};
-    const {
-      synchronized_account_properties = []
-    } = ship.settings || {};
 
     // Build traits that will be sent to Segment
     // Use hull_segments by default
     const traits = { hull_segments: _.map(segments, "name") };
     if (synchronized_properties.length > 0) {
       synchronized_properties.map((prop) => {
-        traits[prop.replace(/^traits_/, "").replace("/", "_")] = user[prop];
+        if (prop.indexOf("account.") === 0) {
+          const t = prop.replace(/^account\./, "");
+          traits[`account_${t.replace("/", "_")}`] = _.get(account, t);
+        } else {
+          traits[prop.replace(/^traits_/, "").replace("/", "_")] = _.get(user, prop);
+        }
         return true;
       });
     }

@@ -1,5 +1,6 @@
 import connect from "connect";
 import _ from "lodash";
+import bodyParser from "body-parser";
 
 function noop() {}
 
@@ -116,6 +117,11 @@ module.exports = function SegmentHandler(options = {}) {
     return this;
   });
 
+  app.use((req, res, next) => {
+    bodyParser.json()(req, res, () => {
+      next();
+    });
+  });
   app.use(parseRequest); // parse segment request, early return if invalid.
   app.use(authTokenMiddleware); // retreives Hull config and stores it in the right place.
   app.use(clientMiddleware);
