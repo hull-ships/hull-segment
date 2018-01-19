@@ -3,6 +3,8 @@
   "description": "Complete control over your customer data with Hull and Segment",
   "tags": ["incoming", "outgoing", "batch", "oneColumn"],
   "index":"ship.js",
+  "source": "segment",
+  "logo": "logo.png",
   "picture": "picture.png",
   "ui": false,
   "admin" : "admin.html",
