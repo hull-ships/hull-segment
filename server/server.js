@@ -85,8 +85,8 @@ module.exports = function server(app, options = {}) {
         url: req.url,
         params: req.params
       };
-      console.log("Error ----------------", err.message, err.status, data);
-      console.log(err.stack);
+      console.log("Error ----------------", { message: err.message, status: err.status, data });
+      // console.log(err.stack);
     }
 
     return res.status(err.status || 500).send({
