@@ -2,13 +2,13 @@ import { reduce } from "lodash";
 import scoped from "../scope-hull-client";
 
 export default function handleTrack(payload, { hull, metric, ship }) {
-  const { context = {}, active, anonymousId, event, properties, userId, originalTimestamp, sentAt, receivedAt, integrations = {} } = payload;
+  const { context = {}, active, anonymousId, event, properties, userId, timestamp, originalTimestamp, sentAt, receivedAt, integrations = {} } = payload;
 
   const { page = {}, location = {}, userAgent, ip = "0" } = context;
   const { url, referrer } = page;
   const { latitude, longitude } = location;
 
-  const created_at = originalTimestamp || sentAt || receivedAt;
+  const created_at = timestamp || receivedAt || sentAt || originalTimestamp;
 
   const _bid = anonymousId || userId;
   let _sid = (created_at || new Date().toISOString()).substring(0, 10);
