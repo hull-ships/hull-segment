@@ -158,5 +158,12 @@
     }
   ],
   "resources": [],
+  "schedules" : [
+    {
+      "url": "/status",
+      "type": "interval",
+      "value": "5"
+    }
+  ],
   "subscriptions" : [ { "url" : "/notify" } ]
 }

@@ -8,7 +8,7 @@ import handlers from "./events";
 
 import analyticsClientFactory from "./analytics-client";
 import updateUser from "./update-user";
-
+import statusHandler from "./status"
 
 module.exports = function server(app, options = {}) {
   const {
@@ -73,6 +73,7 @@ module.exports = function server(app, options = {}) {
   });
 
   app.post("/segment", segment);
+  app.all("/status", statusHandler);
 
   // Error Handler
   app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars

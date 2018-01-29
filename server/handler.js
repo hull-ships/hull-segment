@@ -83,6 +83,8 @@ function processHandlers(handlers, { Hull, onMetric }) {
         Promise.all(processors).then(() => {
           next();
         }, (err = {}) => {
+          // fix https://sentry.io/hull-dev/hull-segment/issues/415436300/
+          if (_.isString(err)) return next({ status: 500, message: err });
           err.status = (err && err.status) || 500;
           return next(err);
         });
