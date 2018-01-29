@@ -1,3 +1,6 @@
+## v0.1.16
+- Use `timestamp` instead of `originalTimestamp` as `created_at` in tracks handler
+
 ## v0.1.15
 - hotfix account properties not sent in User when listed there
 - cleanup Settings Screen
