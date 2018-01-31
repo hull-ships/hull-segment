@@ -40,7 +40,6 @@ export default function updateUserFactory(analyticsClient) {
     // Ignore if write_key is not present
     const { write_key, handle_groups, handle_accounts, public_id_field, public_account_id_field } = ship.settings || {};
     if (!write_key) {
-      asUser.logger.info("outgoing.user.skip", { reason: "no write key", traits });
       return false;
     }
 
