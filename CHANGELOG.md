@@ -1,3 +1,6 @@
+## v0.1.17
+- Don't write outgoing.user.skip if no writeKey
+
 ## v0.1.16
 - Use `timestamp` instead of `originalTimestamp` as `created_at` in tracks handler
 
