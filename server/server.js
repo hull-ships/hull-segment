@@ -1,6 +1,6 @@
 import jwt from "jwt-simple";
 import Promise from "bluebird";
-import { notifHandler } from "hull/lib/utils";
+import { notifHandler, smartNotifierHandler } from "hull/lib/utils";
 
 import devMode from "./dev-mode";
 import SegmentHandler from "./handler";
@@ -8,24 +8,17 @@ import handlers from "./events";
 
 import analyticsClientFactory from "./analytics-client";
 import updateUser from "./update-user";
-import statusHandler from "./status"
+import statusHandler from "./status";
 
 module.exports = function server(app, options = {}) {
-  const {
-    Hull,
-    hostSecret,
-    onMetric,
-    clientMiddleware
-  } = options;
+  const { Hull, hostSecret, onMetric, clientMiddleware } = options;
 
   if (options.devMode) {
     app.use(devMode());
   }
 
   app.get("/admin.html", clientMiddleware, (req, res) => {
-    const {
-      config
-    } = req.hull;
+    const { config } = req.hull;
     const apiKey = jwt.encode(config, hostSecret);
     const encoded = new Buffer(apiKey).toString("base64");
     const hostname = req.hostname;
@@ -47,19 +40,62 @@ module.exports = function server(app, options = {}) {
       },
       handlers: {
         "user:update": (ctx, messages = []) => {
-          return Promise.all(messages.map(message => updateUser(analyticsClient)({
-            message
-          }, {
-            ship: ctx.ship,
-            hull: ctx.client,
-            ignoreFilters
-          })));
+          return Promise.all(
+            messages.map(message =>
+              updateUser(analyticsClient)(
+                {
+                  message
+                },
+                {
+                  ship: ctx.ship,
+                  hull: ctx.client,
+                  ignoreFilters
+                }
+              )
+            )
+          );
         }
       }
     });
   }
 
   app.post("/notify", handlerFactory());
+  app.post(
+    "/smart-notify",
+    smartNotifierHandler({
+      userHandlerOptions: {
+        groupTraits: false
+      },
+      handlers: {
+        "user:update": (ctx, messages = []) => {
+          if (
+            ctx &&
+            ctx.smartNotifierResponse &&
+            ctx.smartNotifierResponse.setFlowControl
+          ) {
+            ctx.smartNotifierResponse.setFlowControl({
+              type: "next",
+              size: 100,
+              in: 100
+            });
+          }
+          return Promise.all(
+            messages.map(message =>
+              updateUser(analyticsClient)(
+                {
+                  message
+                },
+                {
+                  ship: ctx.ship,
+                  hull: ctx.client
+                }
+              )
+            )
+          );
+        }
+      }
+    })
+  );
   app.post("/batch", handlerFactory(true));
 
   const segment = SegmentHandler({
@@ -69,14 +105,15 @@ module.exports = function server(app, options = {}) {
     onMetric,
     clientMiddleware,
     Hull,
-    handlers,
+    handlers
   });
 
   app.post("/segment", segment);
   app.all("/status", statusHandler);
 
   // Error Handler
-  app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
+  app.use((err, req, res, next) => {
+    // eslint-disable-line no-unused-vars
     if (err) {
       const data = {
         status: err.status,
@@ -86,7 +123,11 @@ module.exports = function server(app, options = {}) {
         url: req.url,
         params: req.params
       };
-      console.log("Error ----------------", { message: err.message, status: err.status, data });
+      console.log("Error ----------------", {
+        message: err.message,
+        status: err.status,
+        data
+      });
       // console.log(err.stack);
     }
 

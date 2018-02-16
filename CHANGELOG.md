@@ -1,3 +1,6 @@
+## v0.1.18
+- Add smart notifier endpoint
+
 ## v0.1.17
 - Don't write outgoing.user.skip if no writeKey
 
