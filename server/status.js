@@ -10,10 +10,10 @@ export default function statusCheck(req, res) {
     handle_pages,
     handle_accounts,
     ignore_segment_userId,
+    public_id_field,
     public_account_id_field,
   } = settings;
   const {
-    public_id_field,
     send_events,
     synchronized_account_properties,
     synchronized_properties,
