@@ -8,6 +8,14 @@
   "picture": "picture.png",
   "ui": false,
   "admin" : "admin.html",
+  "tabs": [
+    {
+      "title": "Credentials",
+      "url": "admin.html",
+      "size": "small",
+      "editable": false
+    }
+  ],
   "readme" : "readme.md",
   "version": "0.1.18",
   "deployment_settings":[
