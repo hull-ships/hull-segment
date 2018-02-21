@@ -1,7 +1,7 @@
 {
   "name": "hull-segment",
   "description": "Install Segment in your site",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "homepage": "https://github.com/hull-ships/hull-segment",
   "license": "MIT",
   "main": "dist/ship.js",
@@ -44,7 +44,7 @@
     "hull-ship"
   ],
   "dependencies": {
-    "analytics-node": "^2.0.1",
+    "analytics-node": "^3.2.0",
     "babel-cli": "^6.10.1",
     "babel-loader": "^6.2.4",
     "babel-preset-es2015": "^6.9.0",
