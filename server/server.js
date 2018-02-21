@@ -76,7 +76,7 @@ module.exports = function server(app, options = {}) {
             ctx.smartNotifierResponse.setFlowControl({
               type: "next",
               size: 100,
-              in: 100
+              in: 1
             });
           }
           return Promise.all(
