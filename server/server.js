@@ -75,8 +75,8 @@ module.exports = function server(app, options = {}) {
           ) {
             ctx.smartNotifierResponse.setFlowControl({
               type: "next",
-              size: 100,
-              in: 1
+              size: parseInt(process.env.FLOW_CONTROL_SIZE, 10) || 100,
+              in: parseInt(process.env.FLOW_CONTROL_IN, 10) || 1
             });
           }
           return Promise.all(

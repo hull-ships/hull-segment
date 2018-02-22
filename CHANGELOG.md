@@ -1,3 +1,6 @@
+## v0.1.19
+- Add FLOW_CONTROL_SIZE and FLOW_CONTROL_IN env vars to control smart-notifier behavior
+
 ## v0.1.18
 - Add smart notifier endpoint
 
