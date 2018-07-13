@@ -155,14 +155,6 @@
       "enum" : [ "id", "external_id" ],
       "default" : "external_id",
       "format" : "hidden"
-    },
-    {
-      "name" : "handle_groups",
-      "title" : "Handle Groups",
-      "description" : "Handle group attributes as user traits, prefixed with 'group/'",
-      "type" : "boolean",
-      "default" : false,
-      "format": "hidden"
     }
   ],
   "resources": [],
