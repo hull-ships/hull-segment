@@ -2,7 +2,7 @@ import _ from "lodash";
 
 export default function updateUserFactory(analyticsClient) {
   return function updateUser({ message = {} }, { ship = {}, hull = {}, ignoreFilters = false }) {
-    const { user = {}, segments = [], events = [] } = message;
+    const { user = {}, segments = [], events = [], account_segments = [] } = message;
     const account = message.account || user.account;
 
     // Empty payload ?
@@ -98,6 +98,8 @@ export default function updateUserFactory(analyticsClient) {
           }
           return group;
         }, {});
+        // Add account segments
+        _.set(groupTraits, "hull_account_segments", account_segments);
         if (!_.isEmpty(groupTraits)) {
           asUser.logger.info("outgoing.group.success", { groupId, traits: groupTraits, context });
           analytics.group({ groupId, anonymousId, userId, traits: groupTraits, context, integrations });
