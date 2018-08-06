@@ -174,7 +174,7 @@ describe("Segment Ship", () => {
             done();
           }, 10);
         });
-    });
+    }).timeout(90000);
     it("call Hull.track on page event", (done) => {
       sendRequest({ body: page, query: config })
         .expect({ message: "thanks" })
@@ -187,7 +187,7 @@ describe("Segment Ship", () => {
             done();
           }, 10);
         });
-    });
+    }).timeout(90000);
     it("should Hull.track on page event by default", (done) => {
       shipData = {
         settings: {}
@@ -202,7 +202,7 @@ describe("Segment Ship", () => {
             done();
           }, 10);
         });
-    });
+    }).timeout(90000);
     it("call Hull.track on screen event", (done) => {
       // const postSpy = sinon.spy();
       // const MockHull = mockHullFactory(postSpy, API_RESPONSES.screen);
@@ -229,7 +229,7 @@ describe("Segment Ship", () => {
             done();
           }, 10);
         });
-    });
+    }).timeout(90000);
 
     it("Ignores incoming userId if settings.ignore_segment_userId is true", (done) => {
       shipData = {
