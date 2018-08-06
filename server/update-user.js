@@ -111,6 +111,8 @@ export default function updateUserFactory(analyticsClient) {
             props[prop.replace("/", "_")] = account[prop];
             return props;
           }, {});
+        // Add account segments
+        _.set(accountTraits, "hull_account_segments", account_segments);
 
         if (!_.isEmpty(accountTraits)) {
           hull.logger.debug("group.send", { groupId: accountId, traits: accountTraits, context });
