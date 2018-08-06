@@ -99,7 +99,7 @@ export default function updateUserFactory(analyticsClient) {
           return group;
         }, {});
         // Add account segments
-        _.set(groupTraits, "hull_account_segments", _.map(account_segments, "name"));
+        _.set(groupTraits, "hull_segments", _.map(account_segments, "name"));
         if (!_.isEmpty(groupTraits)) {
           asUser.logger.info("outgoing.group.success", { groupId, traits: groupTraits, context });
           analytics.group({ groupId, anonymousId, userId, traits: groupTraits, context, integrations });
@@ -112,7 +112,7 @@ export default function updateUserFactory(analyticsClient) {
             return props;
           }, {});
         // Add account segments
-        _.set(accountTraits, "hull_account_segments", _.map(account_segments, "name"));
+        _.set(accountTraits, "hull_segments", _.map(account_segments, "name"));
 
         if (!_.isEmpty(accountTraits)) {
           hull.logger.debug("group.send", { groupId: accountId, traits: accountTraits, context });
