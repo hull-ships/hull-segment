@@ -25,7 +25,8 @@ module.exports = function server(app, options = {}) {
     res.render("admin.html", {
       apiKey,
       encoded,
-      hostname
+
+      hostname,
     });
   });
 
@@ -44,22 +45,24 @@ module.exports = function server(app, options = {}) {
             messages.map(message =>
               updateUser(analyticsClient)(
                 {
-                  message
+                  message,
                 },
                 {
                   ship: ctx.ship,
                   hull: ctx.client,
-                  ignoreFilters
+                  ignoreFilters,
                 }
               )
             )
           );
-        }
-      }
+        },
+      },
     });
   }
 
   app.post("/notify", handlerFactory());
+  app.post("/batch", handlerFactory(true));
+
   app.post(
     "/smart-notify",
     smartNotifierHandler({
@@ -83,20 +86,19 @@ module.exports = function server(app, options = {}) {
             messages.map(message =>
               updateUser(analyticsClient)(
                 {
-                  message
+                  message,
                 },
                 {
                   ship: ctx.ship,
-                  hull: ctx.client
+                  hull: ctx.client,
                 }
               )
             )
           );
-        }
-      }
+        },
+      },
     })
   );
-  app.post("/batch", handlerFactory(true));
 
   const segment = SegmentHandler({
     onError(err) {
@@ -105,15 +107,14 @@ module.exports = function server(app, options = {}) {
     onMetric,
     clientMiddleware,
     Hull,
-    handlers
+    handlers,
   });
 
   app.post("/segment", segment);
   app.all("/status", statusHandler);
 
   // Error Handler
-  app.use((err, req, res, next) => {
-    // eslint-disable-line no-unused-vars
+  app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
     if (err) {
       const data = {
         status: err.status,
@@ -121,18 +122,18 @@ module.exports = function server(app, options = {}) {
         method: req.method,
         headers: req.headers,
         url: req.url,
-        params: req.params
+        params: req.params,
       };
       console.log("Error ----------------", {
         message: err.message,
         status: err.status,
-        data
+        data,
       });
       // console.log(err.stack);
     }
 
     return res.status(err.status || 500).send({
-      message: err.message
+      message: err.message,
     });
   });
 
