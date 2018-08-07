@@ -82,7 +82,8 @@ export default function updateUserFactory(analyticsClient) {
     if (!_.isEmpty(_.get(changes, "segments", {})) ||
         _.intersection(synchronized_properties, changedUserAttributes).length > 0 ||
         !_.isEmpty(_.get(changes, "account_segments", {})) ||
-        _.intersection(synchronized_account_properties, changedAccountAttributes).length > 0) {
+        _.intersection(synchronized_account_properties, changedAccountAttributes).length > 0 ||
+        ignoreFilters === true) {
       const segment_ids = _.map(segments, "id");
       if (
         !ignoreFilters &&
