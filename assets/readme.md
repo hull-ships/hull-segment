@@ -39,6 +39,7 @@ The Segment Connector sends and receives events for all users unless you restric
 You can specify the attributes that are getting send to Segment along with each event in the section “Hull as Source” of the “Settings” tab. By default, only the list of segments a user belongs to are send to Segment:
 ![Determine attributes](./docs/hullassource02.png)
 While this setting does not affect your MTU count in Segment, you might want to limit the attributes to the ones the Destinations in Segment can handle. This ensures an efficient data flow with less overhead.
+Hull User Segments are automatically sent in every `identify` call as property `hull_segments`. The same applies to Account Segments, these are automatically sent as property `hull_segments` in `group` calls.
 
 ## Determine the events to send to Segment (Hull as Source)
 
