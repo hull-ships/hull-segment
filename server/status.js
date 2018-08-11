@@ -1,3 +1,5 @@
+// @flow
+
 import _ from "lodash";
 
 export default function statusCheck(req, res) {
@@ -11,13 +13,13 @@ export default function statusCheck(req, res) {
     handle_accounts,
     ignore_segment_userId,
     public_id_field,
-    public_account_id_field,
+    public_account_id_field
   } = settings;
   const {
     send_events,
     synchronized_account_properties,
     synchronized_properties,
-    synchronized_segments,
+    synchronized_segments
   } = private_settings;
 
   if (!write_key && _.size(synchronized_segments)) {

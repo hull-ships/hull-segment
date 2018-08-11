@@ -1,28 +1,25 @@
 var path = require("path");
 var webpack = require("webpack");
 
+const isProduction = () => process.env.NODE_ENV === "development"
 module.exports = {
+  mode: isProduction() ? "production" : "development",
   entry: {
     ship: path.join(__dirname, "src/index.js"),
   },
+
   output: {
     path: path.join(__dirname, "/dist/"),
     filename: "[name].js",
     publicPath: "/"
   },
-  plugins: [
-    new webpack.optimize.UglifyJsPlugin({
-      compressor: {
-        warnings: false,
-        screw_ie8: false
-      }
-    }),
-    new webpack.DefinePlugin({
-      "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV)
-    })
-  ],
+
+  plugins: [new webpack.DefinePlugin({
+    "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV)
+  })],
+
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.js?$/,
         exclude: /node_modules/,
@@ -30,7 +27,27 @@ module.exports = {
           path.resolve(__dirname, "test"),
           path.resolve(__dirname, "src")
         ],
-        loader: "babel"
+        use: [{
+          loader: 'babel-loader',
+          options: {
+            "presets": [
+              [
+                "babel-preset-env",
+                {
+                  "targets": {
+                    "browsers": "last 2 versions"
+                  }
+                }
+              ],
+              "flow"
+            ],
+            "plugins": [
+              "transform-flow-comments",
+              ["transform-object-rest-spread", { "useBuiltIns": true }]
+            ]
+          }
+
+        }]
       }
     ]
   }

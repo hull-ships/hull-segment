@@ -1,3 +1,5 @@
+// @noflow
+
 /* global require, Hull*/
 
 const segment = require('./segment');

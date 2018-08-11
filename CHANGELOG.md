@@ -1,3 +1,10 @@
+## v0.2.0
+- [BREAKING] use consistent behaviour with other connectors: Send nothing by default, both in User and Account udpates
+- Use hull-node 0.14 with hull-client-node 2.0.0
+- add flow typing
+- support account updates.
+- Update flow tooling - ensure coverage
+
 ## v0.1.19
 - Add FLOW_CONTROL_SIZE and FLOW_CONTROL_IN env vars to control smart-notifier behavior
 

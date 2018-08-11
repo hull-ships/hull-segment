@@ -1,3 +1,5 @@
+// @flow
+
 import connect from "connect";
 import _ from "lodash";
 import bodyParser from "body-parser";
@@ -5,7 +7,10 @@ import bodyParser from "body-parser";
 function noop() {}
 
 function camelize(str) {
-  const ret = str.replace(/[-_\s]+(.)?/g, (match, c) => (c ? c.toUpperCase() : ""));
+  const ret = str.replace(
+    /[-_\s]+(.)?/g,
+    (match, c) => (c ? c.toUpperCase() : "")
+  );
   return ret.charAt(0).toLowerCase() + ret.slice(1);
 }
 
@@ -18,7 +23,10 @@ function authTokenMiddleware(req, res, next) {
     const [authType, token64] = req.headers.authorization.split(" ");
     if (authType === "Basic" && token64) {
       try {
-        req.hull.token = new Buffer(token64, "base64").toString().split(":")[0].trim();
+        req.hull.token = new Buffer(token64, "base64")
+          .toString()
+          .split(":")[0]
+          .trim();
         req.hull.config = false;
       } catch (err) {
         const e = new Error("Invalid Basic Auth Header");
@@ -53,7 +61,8 @@ function processHandlers(handlers, { Hull, onMetric }) {
       const { client: hull, ship, token } = req.hull;
       const { message } = req.segment;
 
-      const metric = (metricName, value) => onMetric(metricName, value, ship || {});
+      const metric = (metricName, value) =>
+        onMetric(metricName, value, ship || {});
 
       const eventName = message.type;
       const eventHandlers = handlers[eventName];
@@ -67,27 +76,35 @@ function processHandlers(handlers, { Hull, onMetric }) {
       metric(`request.${eventName}`, 1);
 
       if (eventHandlers && eventHandlers.length > 0) {
-        if (message && message.integrations && message.integrations.Hull === false) {
+        if (
+          message &&
+          message.integrations &&
+          message.integrations.Hull === false
+        ) {
           return next();
         }
 
-        Object.keys(message).map((k) => {
+        Object.keys(message).map(k => {
           const camelK = camelize(k);
           message[camelK] = message[camelK] || message[k];
           return k;
         });
 
+        const processors = eventHandlers.map(fn =>
+          fn(message, { ship, hull, metric })
+        );
 
-        const processors = eventHandlers.map(fn => fn(message, { ship, hull, metric }));
-
-        Promise.all(processors).then(() => {
-          next();
-        }, (err = {}) => {
-          // fix https://sentry.io/hull-dev/hull-segment/issues/415436300/
-          if (_.isString(err)) return next({ status: 500, message: err });
-          err.status = (err && err.status) || 500;
-          return next(err);
-        });
+        Promise.all(processors).then(
+          () => {
+            next();
+          },
+          (err = {}) => {
+            // fix https://sentry.io/hull-dev/hull-segment/issues/415436300/
+            if (_.isString(err)) return next({ status: 500, message: err });
+            err.status = (err && err.status) || 500;
+            return next(err);
+          }
+        );
       } else {
         const e = new Error("Not Supported");
         e.status = 501;
@@ -101,14 +118,12 @@ function processHandlers(handlers, { Hull, onMetric }) {
   };
 }
 
-
 module.exports = function SegmentHandler(options = {}) {
   const app = connect();
   const { Hull, clientMiddleware, handlers = [], onMetric = noop } = options;
 
   const _handlers = {};
   const _flushers = [];
-
 
   _.map(handlers, (fn, event) => {
     _handlers[event] = _handlers[event] || [];
@@ -131,7 +146,8 @@ module.exports = function SegmentHandler(options = {}) {
   app.use((req, res) => {
     res.json({ message: "thanks" });
   });
-  app.use((err, req, res, next) => {  // eslint-disable-line no-unused-vars
+  app.use((err, req, res, next) => {
+    // eslint-disable-line no-unused-vars
     if (err) {
       const data = {
         status: err.status,

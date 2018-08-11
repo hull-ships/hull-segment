@@ -1,3 +1,5 @@
+// @flow
+
 import track from "./track";
 import group from "./group";
 import alias from "./alias";

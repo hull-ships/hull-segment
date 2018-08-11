@@ -1,3 +1,5 @@
+// @flow
+
 const EMAIL_REGEXP = /([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})/i;
 
 /**
@@ -8,7 +10,12 @@ const EMAIL_REGEXP = /([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})/i;
  * @param  {Object} additionalClaims optional claims
  * @return {Object} scoped client instance
  */
-export default function scope(hull, user = {}, settings, additionalClaims = {}) {
+export default function scope(
+  hull,
+  user = {},
+  settings,
+  additionalClaims = {}
+) {
   const { hullId, userId, anonymousId, traits = {} } = user;
   if (!hullId && !userId && !anonymousId) {
     return hull;
@@ -19,8 +26,12 @@ export default function scope(hull, user = {}, settings, additionalClaims = {}) 
   // via the `ignore_segment_userId` setting.
   if (settings.ignore_segment_userId !== true) {
     if (hullId || userId) {
-      if (hullId) { as.id = hullId; }
-      if (userId) { as.external_id = userId; }
+      if (hullId) {
+        as.id = hullId;
+      }
+      if (userId) {
+        as.external_id = userId;
+      }
     }
   }
 
