@@ -2,7 +2,7 @@ import _ from "lodash";
 
 export default function updateUserFactory(analyticsClient) {
   return function updateUser({ message = {} }, { ship = {}, hull = {}, ignoreFilters = false }) {
-    const { user = {}, segments = [], events = [] } = message;
+    const { user = {}, segments = [], events = [], account_segments = [], changes = {} } = message;
     const account = message.account || user.account;
 
     // Empty payload ?
@@ -72,58 +72,74 @@ export default function updateUserFactory(analyticsClient) {
       return false;
     }
 
-    const segment_ids = _.map(segments, "id");
-    if (
-      !ignoreFilters &&
-      synchronized_segments.length > 0 && // Should we move to "Send no one by default ?"
-      !_.intersection(segment_ids, synchronized_segments).length
-      ) {
-      asUser.logger.info("outgoing.user.skip", { reason: "not matching any segment", segment_ids, traits });
-      return false;
-    }
+    const changedUserAttributes = _.keys(_.get(changes, "user", {}));
+    const changedAccountAttributes = _.keys(_.get(changes, "account", {}));
 
     const integrations = { Hull: false };
-
     const context = { active: false, ip: 0 };
+    let ret = false;
 
-    try {
-      // Add group if available
-      if (handle_groups && groupId && userId) {
-        context.groupId = groupId;
-        const groupTraits = _.reduce(user, (group, value, key) => {
-          const mk = key.match(/^traits_group\/(.*)/);
-          const groupKey = mk && mk[1];
-          if (groupKey && groupKey !== "id") {
-            group[groupKey] = value;
-          }
-          return group;
-        }, {});
-        if (!_.isEmpty(groupTraits)) {
-          asUser.logger.info("outgoing.group.success", { groupId, traits: groupTraits, context });
-          analytics.group({ groupId, anonymousId, userId, traits: groupTraits, context, integrations });
-        }
-      } else if (handle_accounts && accountId) {
-        const accountTraits = synchronized_account_properties
-          .map(k => k.replace(/^account\./, ""))
-          .reduce((props, prop) => {
-            props[prop.replace("/", "_")] = account[prop];
-            return props;
-          }, {});
-
-        if (!_.isEmpty(accountTraits)) {
-          hull.logger.debug("group.send", { groupId: accountId, traits: accountTraits, context });
-          analytics.group({ groupId: accountId, anonymousId, userId, traits: accountTraits, context, integrations });
-        }
-
-        asUser.account({ external_id: accountId }).logger.info("outgoing.account.success", { groupId: accountId, traits: accountTraits, context });
+    if (!_.isEmpty(_.get(changes, "segments", {})) ||
+        _.intersection(synchronized_properties, changedUserAttributes).length > 0 ||
+        !_.isEmpty(_.get(changes, "account_segments", {})) ||
+        _.intersection(synchronized_account_properties, changedAccountAttributes).length > 0 ||
+        ignoreFilters === true) {
+      const segment_ids = _.map(segments, "id");
+      if (
+        !ignoreFilters &&
+        synchronized_segments.length > 0 && // Should we move to "Send no one by default ?"
+        !_.intersection(segment_ids, synchronized_segments).length
+        ) {
+        asUser.logger.info("outgoing.user.skip", { reason: "not matching any segment", segment_ids, traits });
+        return false;
       }
-    } catch (err) {
-      console.warn("Error processing group update", err);
+
+      try {
+        // Add group if available
+        if (handle_groups && groupId && userId) {
+          context.groupId = groupId;
+          const groupTraits = _.reduce(user, (group, value, key) => {
+            const mk = key.match(/^traits_group\/(.*)/);
+            const groupKey = mk && mk[1];
+            if (groupKey && groupKey !== "id") {
+              group[groupKey] = value;
+            }
+            return group;
+          }, {});
+          // Add account segments
+          _.set(groupTraits, "hull_segments", _.map(account_segments, "name"));
+          if (!_.isEmpty(groupTraits)) {
+            asUser.logger.info("outgoing.group.success", { groupId, traits: groupTraits, context });
+            analytics.group({ groupId, anonymousId, userId, traits: groupTraits, context, integrations });
+          }
+        } else if (handle_accounts && accountId) {
+          const accountTraits = synchronized_account_properties
+            .map(k => k.replace(/^account\./, ""))
+            .reduce((props, prop) => {
+              props[prop.replace("/", "_")] = account[prop];
+              return props;
+            }, {});
+          // Add account segments
+          _.set(accountTraits, "hull_segments", _.map(account_segments, "name"));
+
+          if (!_.isEmpty(accountTraits)) {
+            hull.logger.debug("group.send", { groupId: accountId, traits: accountTraits, context });
+            analytics.group({ groupId: accountId, anonymousId, userId, traits: accountTraits, context, integrations });
+          }
+
+          asUser.account({ external_id: accountId }).logger.info("outgoing.account.success", { groupId: accountId, traits: accountTraits, context });
+        }
+      } catch (err) {
+        console.warn("Error processing group update", err);
+      }
+
+      ret = analytics.identify({ anonymousId, userId, traits, context, integrations });
+      asUser.logger.info("outgoing.user.success", { userId, traits });
+    } else {
+      asUser.logger.info("outgoing.user.skip", { reason: "No changes detected that would require a synchronization to segment.com" });
+      ret = false;
     }
 
-
-    const ret = analytics.identify({ anonymousId, userId, traits, context, integrations });
-    asUser.logger.info("outgoing.user.success", { userId, traits });
 
     if (events && events.length > 0) {
       events.map((e) => {
