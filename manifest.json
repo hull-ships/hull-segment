@@ -17,7 +17,7 @@
     }
   ],
   "readme" : "readme.md",
-  "version": "0.1.19",
+  "version": "0.1.20",
   "deployment_settings":[
     {
       "name"       : "_selector",
@@ -61,7 +61,7 @@
     {
       "name": "synchronized_properties",
       "title": "Attributes to send in Users",
-      "description": "*By default, only `email` and `hull_segments` are sent to Segment.com in `analytics.identify()` calls*",
+      "description": "*By default, only `email` and `hull_segments` (User Segments) are sent to Segment.com in `analytics.identify()` calls*",
       "type": "array",
       "format": "trait",
       "items": {
@@ -72,7 +72,7 @@
     {
       "name": "synchronized_account_properties",
       "title": "Attributes to send in Accounts",
-      "description": "*By default, only `domain` is sent to Segment.com in `analytics.group()` calls*",
+      "description": "*By default, only `domain` and `hull_segments` (Account Segments) are sent to Segment.com in `analytics.group()` calls*",
       "type": "array",
       "format": "accountTrait",
       "items": {
