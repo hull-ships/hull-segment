@@ -20,7 +20,11 @@ function updateUser(hull, user, shipSettings, active) {
     const { userId, anonymousId, traits = {} } = user;
     const { email } = traits || {};
 
-    const asUser = hull.asUser({ external_id: userId, email, anonymous_id: anonymousId });
+    const asUser = hull.asUser({
+      external_id: userId,
+      email,
+      anonymous_id: anonymousId
+    });
 
     if (shipSettings.ignore_segment_userId === true && !email && !anonymousId) {
       const logPayload = { id: user.id, anonymousId, email };
@@ -49,15 +53,19 @@ function updateUser(hull, user, shipSettings, active) {
 export default function handleIdentify(payload, { hull, metric, ship }) {
   const { context, traits, userId, anonymousId, integrations = {} } = payload;
   const { active = false } = context || {};
-  const user = reduce((traits || {}), (u, v, k) => {
-    if (v == null) return u;
-    if (ALIASED_FIELDS[k.toLowerCase()]) {
-      u.traits[ALIASED_FIELDS[k.toLowerCase()]] = v;
-    } else if (!includes(IGNORED_TRAITS, k)) {
-      u.traits[k] = v;
-    }
-    return u;
-  }, { userId, anonymousId, traits: {} });
+  const user = reduce(
+    traits || {},
+    (u, v, k) => {
+      if (v == null) return u;
+      if (ALIASED_FIELDS[k.toLowerCase()]) {
+        u.traits[ALIASED_FIELDS[k.toLowerCase()]] = v;
+      } else if (!includes(IGNORED_TRAITS, k)) {
+        u.traits[k] = v;
+      }
+      return u;
+    },
+    { userId, anonymousId, traits: {} }
+  );
 
   if (integrations.Hull && integrations.Hull.id === true) {
     user.hullId = user.userId;
