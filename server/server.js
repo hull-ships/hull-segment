@@ -112,8 +112,7 @@ module.exports = function server(app, options = {}) {
   app.all("/status", statusHandler);
 
   // Error Handler
-  app.use((err, req, res, next) => {
-    // eslint-disable-line no-unused-vars
+  app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
     if (err) {
       const data = {
         status: err.status,

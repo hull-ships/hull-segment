@@ -30,7 +30,7 @@
     "clean": "./node_modules/.bin/rimraf dist; ./node_modules/.bin/rimraf lib",
     "start": "node -r newrelic ./lib",
     "start:dev": "./node_modules/.bin/nodemon -w server --exec ./node_modules/.bin/babel-node -- server",
-    "test": "npm run test:units",
+    "test": "npm run test:lint && npm run test:units",
     "test:lint": "eslint server",
     "test:modules": "npm outdated --depth=0",
     "test:units": "NODE_ENV=test ./node_modules/.bin/mocha -R spec ./tests/index",

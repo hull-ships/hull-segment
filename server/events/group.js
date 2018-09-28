@@ -21,6 +21,7 @@ export class GroupBatchHandler {
   }
 
   static handle(event, { hull, ship, metric }) {
+    // eslint-disable-next-line no-multi-assign
     const handler = BATCH_HANDLERS[ship.id] = BATCH_HANDLERS[ship.id] || new GroupBatchHandler({ hull, ship, metric });
     handler.add(event, { hull, ship });
 
@@ -66,7 +67,7 @@ export class GroupBatchHandler {
 
     const { hull, metric } = this;
 
-    return new Promise((resolve /* , reject*/) => {
+    return new Promise((resolve /* , reject */) => {
       const users = {};
 
       (function fetch(page = 1) {
