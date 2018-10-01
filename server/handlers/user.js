@@ -2,32 +2,34 @@
 
 import _ from "lodash";
 import fp from "lodash/fp";
-import type { HullContext, HullUserUpdateMessage, HullEvent } from "hull";
+import type {
+  HullContext,
+  HullEvent,
+  HullUserUpdateMessage,
+  HullUserUpdateHandlerCallback,
+  HullMessageResponse,
+  HullNotificationResponse
+} from "hull";
 import type {
   SegmentClientFactory,
   SegmentContext,
-  SegmentConnector,
-  NotificationCallbackResponse,
-  Transaction
+  SegmentConnector
 } from "../types";
 import segmentEvent from "../lib/segment-event";
-import setFlowControl from "../lib/set-flow-control";
 import { getfirstNonNull, getFirstAnonymousIdFromEvents } from "../lib/utils";
 
-type LocalContext = HullContext & {
-  connector: SegmentConnector
-};
+// import { notificationDefaultFlowControl } from "hull/lib/utils";
 
 const context: SegmentContext = { active: false, ip: 0 };
 const integrations = { Hull: false };
 
 function update(
   analyticsClient,
-  { connector, hull, isBatch }: LocalContext,
+  { connector, metric, client, isBatch }: HullContext<SegmentConnector>,
   message: HullUserUpdateMessage
-): NotificationCallbackResponse {
+): HullMessageResponse | void {
   const { settings = {}, private_settings = {} } = connector;
-  const { user = {}, user_segments, events } = message;
+  const { user, segments, events, message_id } = message;
   const account = message.account || user.account;
 
   // Empty payload ?
@@ -35,7 +37,7 @@ function update(
     return;
   }
 
-  const asUser = hull.asUser(user);
+  const asUser = client.asUser({ ...user });
 
   const {
     synchronized_properties = [],
@@ -46,7 +48,6 @@ function update(
 
   const {
     write_key,
-    handle_groups,
     handle_accounts,
     public_id_field,
     public_account_id_field
@@ -61,10 +62,11 @@ function update(
   // if we have events in the payload, we take the annymousId of the first event
   // Otherwise, we look for known anonymousIds attached to the user and we take the first one
   const anonymousId =
-    getFirstAnonymousIdFromEvents(events) || getfirstNonNull(user.anonymous_id);
+    getFirstAnonymousIdFromEvents(events) ||
+    getfirstNonNull(user.anonymous_ids);
   const userId = user[public_id_field];
   const groupId = account[public_account_id_field];
-  const segmentIds = _.map(user_segments, "id");
+  const segmentIds = _.map(segments, "id");
 
   // We have no identifier for the user, we have to skip
   if (!userId && !anonymousId) {
@@ -80,6 +82,7 @@ function update(
   //Process everyone when in batch mode.
   if (!isBatch && !_.size(_.intersection(segmentIds, synchronized_segments))) {
     return {
+      message_id,
       action: "skip",
       message: "Not matching any segment",
       id: user.id,
@@ -105,7 +108,7 @@ function update(
       return traits;
     },
     {
-      hull_segments: _.map(user_segments, "name")
+      hull_segments: _.map(segments, "name")
     }
   );
 
@@ -116,33 +119,37 @@ function update(
     context,
     integrations
   });
+  metric.increment("ship.service_api.call", 1, ["type:identify"]);
   asUser.logger.info("outgoing.user.success", { traits });
 
   events.map(
-    (e: HullEvent): void | Transaction => {
-      const { event, event_source, context = {} } = e;
+    (e: HullEvent): HullMessageResponse => {
+      const { event_id, event, event_source, context = {} } = e;
       if (event_source === "segment" && !forward_events) {
         // Skip event if it comes from Segment and we're not forwarding events
         return {
+          message_id,
           action: "skip",
           message: "Event comes from segment and forward_events is disabled",
           id: user.id,
           type: "user",
-          data: { anonymousId, userId, segmentIds, eventId: e.id }
+          data: { anonymousId, userId, segmentIds, event_id }
         };
       }
 
       if (!_.includes(send_events, e.event)) {
         return {
+          message_id,
           action: "skip",
           message: "Event not in whitelisted list",
           id: user.id,
           type: "user",
-          data: { anonymousId, userId, segmentIds, eventId: e.id }
+          data: { anonymousId, userId, segmentIds, event_id }
         };
       }
 
       const track = segmentEvent({
+        analytics,
         anonymousId,
         event: e,
         userId,
@@ -154,23 +161,44 @@ function update(
       const type = event === "page" || event === "screen" ? event : "track";
 
       if (track.channel === "browser") {
-        analytics.page(track);
+        metric.increment("ship.service_api.call", 1, ["type:page"]);
       } else if (track.channel === "mobile") {
-        analytics.enqueue("screen", track);
+        metric.increment("ship.service_api.call", 1, ["type:screen"]);
       } else {
-        analytics.track(track);
+        metric.increment("ship.service_api.call", 1, ["type:track"]);
       }
       asUser.logger.info("outgoing.event.success", { track });
+
+      return {
+        message_id,
+        action: "success",
+        id: user.id,
+        type: "event",
+        data: { track }
+      };
     }
   );
 }
 
-module.exports = (analyticsClient: SegmentClientFactory) => (
-  ctx: HullContext,
+module.exports = (
+  analyticsClient: SegmentClientFactory
+): HullUserUpdateHandlerCallback => (
+  ctx: HullContext<SegmentConnector>,
   messages: Array<HullUserUpdateMessage>
-) => {
-  setFlowControl(ctx);
-  return Promise.all(
+): HullNotificationResponse =>
+  Promise.all(
     messages.map(message => update(analyticsClient, ctx, message))
-  );
-};
+  ).then(responses => ({
+    responses: _.compact(responses),
+    flow_control: {
+      type: "next",
+      size: parseInt(process.env.FLOW_CONTROL_SIZE, 10) || 100,
+      in: parseInt(process.env.FLOW_CONTROL_IN, 10) || 1,
+      in_time: 0
+    }
+  }));
+// return notificationDefaultFlowControl({
+//   ctx,
+//   channel: "user:update",
+//   result: "success" | "error" | "retry"
+// })

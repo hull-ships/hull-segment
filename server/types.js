@@ -1,42 +1,180 @@
 // @flow
 
 import type {
-  HullSegment,
-  HullNotification,
   HullConnector,
-  HullUserUpdateMessage,
-  HullAccountUpdateMessage,
-  HullClientConfiguration,
-  HullAccountAttributes,
-  HullAccountIdent,
-  HullAccount,
-  HullAttributeName,
-  HullAttributeValue,
-  HullAttributesChanges,
-  HullEvent,
-  HullObjectAttributes,
-  HullObjectIdent,
-  HullObject,
-  HullReqContext,
-  HullRequest,
-  HullSegmentsChanges,
-  HullUserAttributes,
-  HullUserChanges,
-  HullUserIdent,
-  HullUser,
+  HullRequest as Request,
+  HullContext as Context,
 } from "hull";
+
+// IMPORTANT: FOR SPREAD SYNTAX:
+// https://github.com/facebook/flow/issues/3534#issuecomment-287580240
 
 /* Local Custom Types */
 
-export type Transaction = {|
-  action: "success" | "skip" | "error",
-  message: string,
-  id: string,
-  type: "user" | "account",
-  data: {}
-|};
+export type SegmentIntegrations = {
+  [string]: any
+};
+export type SegmentTraits = {
+  [string]: any
+};
+export type SegmentProperties = {
+  [string]: any
+};
+export type SegmentContext = {
+  ip?: string | number,
+  active?: boolean,
+  // groupId?: string,
+  location?: {
+    city?: string,
+    country?: string,
+    region?: string,
+    speed?: string,
+    latitude?: string,
+    longitude?: string
+  },
+  device?: {
+    model?: string,
+    type?: string
+  },
+  os?: {
+    name?: string,
+    version?: string
+  },
+  app?: {
+    build?: string,
+    name?: string,
+    version?: string
+  },
+  page?: {
+    hash?: string,
+    path?: string,
+    referrer?: string,
+    search?: string,
+    title?: string,
+    url?: string
+  },
+  referrer?: {
+    type?: string,
+    name?: string,
+    url?: string,
+    link?: string
+  },
+  traits?: SegmentTraits,
+  userAgent?: string
+};
 
-export type SegmentConnector = HullConnector & {
+/* Incoming Segment calls */
+export type SegmentIncomingBase = {
+  anonymousId?: ?string,
+  userId?: string,
+  type: "screen" | "page" | "track" | "identify" | "group",
+  version: number,
+  timestamp: string,
+  active?: boolean,
+  event: typeof undefined,
+  originalTimestamp?: string,
+  sentAt?: string,
+  receivedAt?: string,
+  integrations: SegmentIntegrations,
+  context: SegmentContext,
+  traits?: SegmentProperties
+};
+export type SegmentIncomingPage = {
+  ...$Exact<SegmentIncomingBase>,
+  type: "page",
+  name?: string,
+  event?: string,
+  properties?: {
+    [string]: any,
+  }
+};
+export type SegmentIncomingScreen = {
+  ...$Exact<SegmentIncomingBase>,
+  type: "screen",
+  name: string,
+  event?: string,
+  properties?: SegmentProperties,
+};
+export type SegmentIncomingTrack = {
+  ...$Exact<SegmentIncomingBase>,
+  type: "track",
+  active?: boolean,
+  event?: string,
+  properties?: SegmentProperties
+};
+
+
+export type SegmentIncomingIdentify = {
+  ...$Exact<SegmentIncomingBase>,
+  type: "identify",
+  traits: SegmentProperties
+};
+export type SegmentIncomingGroup = {
+  ...$Exact<SegmentIncomingBase>,
+  type: "group",
+  groupId?: string,
+  traits: SegmentProperties
+};
+
+export type SegmentIncomingPayload =
+  | SegmentIncomingPage
+  | SegmentIncomingScreen
+  | SegmentIncomingTrack
+  | SegmentIncomingGroup;
+
+/* Outgoing Segment calls */
+export type SegmentOutgoingBase = {
+  context: SegmentContext,
+  userId?: ?string,
+  integrations: SegmentIntegrations,
+  anonymousId?: ?string,
+  timestamp?: Date | string
+};
+export type SegmentOutgoingPage = {
+  ...$Exact<SegmentOutgoingBase>,
+  channel: "browser",
+  name: string,
+  properties: SegmentProperties
+};
+export type SegmentOutgoingScreen = {
+  ...$Exact<SegmentOutgoingBase>,
+  channel: "mobile",
+  name: string
+};
+export type SegmentOutgoingIdentify = {
+  ...$Exact<SegmentOutgoingBase>,
+  traits?: SegmentTraits,
+  context?: SegmentContext
+};
+export type SegmentOutgoingTrack = {
+  ...$Exact<SegmentOutgoingBase>,
+  event?: string,
+  properties: SegmentProperties
+};
+export type SegmentOutgoingGroup = {};
+
+export type SegmentOutgoingPayload =
+  | SegmentOutgoingTrack
+  | SegmentOutgoingPage
+  | SegmentOutgoingScreen;
+
+  export type StatusError = Error & {
+    status?: number
+  };
+
+
+
+export type SegmentClient = {
+  track: SegmentOutgoingTrack => void,
+  page: SegmentOutgoingPage => void,
+  enqueue: ("page" | "screen" | "track", SegmentOutgoingPayload) => void,
+  group: SegmentOutgoingGroup => void,
+  identify: SegmentOutgoingIdentify => void
+};
+export type SegmentClientFactory = string => SegmentClient;
+
+export type SegmentConnector = {
+  ...$Exact<HullConnector>,
   settings: {
     write_key: string,
     ignore_segment_userId: boolean,
@@ -55,80 +193,12 @@ export type SegmentConnector = HullConnector & {
     send_events: Array<string>
   }
 };
+export type HullContext = Context<SegmentConnector>;
 
-export type SegmentContext = {
-  ip?: string | number,
-  groupId?: string,
-  os?: {
-    name?: string,
-    version?: string
-  },
-  referrer?: {
-    id?: string,
-    type?: string
-  },
-  page?: {
-    path?: string,
-    referrer?: string,
-    search?: string,
-    title?: string,
-    url?: string
-  },
-  traits?: {},
-  userAgent?: string,
-  active?: boolean
-};
-
-
-export type SegmentPayload = {
-  userId?: string,
-  groupId?: string,
-  channel?: "mobile" | "browser",
-  timestamp?: Date,
-  integrations?: {},
-  context?: SegmentContext,
-  traits?: {},
-  properties?: {}
-};
-
-
-export type SegmentEvent = {
-  messageId: string,
-  userId?: string,
-  timestamp?: Date,
-  integrations: {},
-  context: SegmentContext
-};
-export type SegmentIdentify = SegmentEvent & {
-  traits?: {
-    [string]: HullAttributeValue
+type Rq = Request<HullContext>;
+export type HullRequest = {
+  ...$Exact<Rq>,
+  segment: {
+    message: SegmentIncomingPayload
   }
 };
-export type SegmentGroup = SegmentEvent & {
-  groupId: string,
-  traits: {
-    [string]: HullAttributeValue
-  }
-};
-export type SegmentTrack = SegmentEvent & {
-  anonymousId?: string,
-  properties?: {
-    [string]: HullAttributeValue
-  }
-};
-
-export type SegmentClient = {
-  track: SegmentPayload => void,
-  page: SegmentPayload => void,
-  enqueue: ("page" | "screen" | "track", SegmentPayload) => void,
-  group: SegmentPayload => void,
-  identify: SegmentPayload => void
-};
-export type SegmentClientFactory = string => SegmentClient;
-
-export type StatusError = Error & {
-  status?: number,
-  message?: string,
-}
-
-export type NotificationCallbackResponse = void | Transaction

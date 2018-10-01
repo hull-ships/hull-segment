@@ -1,37 +1,39 @@
 // @flow
 
 import _ from "lodash";
-import type { HullContext, HullAccountUpdateMessage } from "hull";
+import type {
+  HullContext,
+  HullAccountUpdateMessage,
+  HullAccountUpdateHandlerCallback,
+  HullNotificationResponse,
+  HullMessageResponse
+} from "hull";
 import type {
   SegmentClientFactory,
   SegmentContext,
-  SegmentConnector,
-  NotificationCallbackResponse
+  SegmentConnector
 } from "../types";
-import setFlowControl from "../lib/set-flow-control";
 import { getfirstNonNull, getFirstAnonymousIdFromEvents } from "../lib/utils";
 
-type LocalContext = HullContext & {
-  connector: SegmentConnector
-};
+// import { notificationDefaultFlowControl } from "hull/lib/utils";
 
 const context = { active: false, ip: 0 };
 const integrations = { Hull: false };
 
 function update(
   analyticsClient,
-  { connector, hull, isBatch }: LocalContext,
-  { message }: { message: HullAccountUpdateMessage }
-): NotificationCallbackResponse {
+  { connector, metric, client, isBatch }: HullContext<SegmentConnector>,
+  message: HullAccountUpdateMessage
+): HullMessageResponse | void {
   const { settings = {}, private_settings = {} } = connector;
-  const { account = {}, account_segments } = message;
+  const { account, account_segments } = message;
 
   // Empty payload ?
   if (!account.id) {
-    return ;
+    return;
   }
 
-  const asAccount = hull.asAccount(account);
+  const asAccount = client.asAccount(account);
 
   const {
     synchronized_account_properties = [],
@@ -41,7 +43,6 @@ function update(
 
   const {
     write_key,
-    handle_groups,
     handle_accounts,
     public_id_field,
     public_account_id_field = "external_id"
@@ -52,10 +53,9 @@ function update(
   }
 
   const analytics = analyticsClient(write_key);
-  const anonymousId = getfirstNonNull(account.anonymous_id);
-  const accountId: string = account && account[public_account_id_field];
+  const anonymousId = getfirstNonNull(account.anonymous_ids);
+  const accountId: ?string = account && account[public_account_id_field];
   const segmentIds = _.map(account_segments, "id");
-
 
   // We have no identifier for the user, we have to skip
   if (!accountId) {
@@ -99,16 +99,35 @@ function update(
     context,
     integrations
   });
+  metric.increment("ship.service_api.call", 1, ["type:group"]);
   asAccount.logger.info("outgoimg.account.success", { traits });
-
+  return {
+    action: "success",
+    id: account.id,
+    type: "account",
+    data: { traits }
+  }
 }
 
-module.exports = (analyticsClient: SegmentClientFactory) => (
-  ctx: HullContext,
+module.exports = (
+  analyticsClient: SegmentClientFactory
+): HullAccountUpdateHandlerCallback => (
+  ctx: HullContext<SegmentConnector>,
   messages: Array<HullAccountUpdateMessage>
-) => {
-  setFlowControl(ctx);
-  return Promise.all(
+): HullNotificationResponse =>
+  Promise.all(
     messages.map(message => update(analyticsClient, ctx, message))
-  );
-};
+  ).then(responses => ({
+    responses: _.compact(responses),
+    flow_control: {
+      type: "next",
+      size: parseInt(process.env.FLOW_CONTROL_SIZE, 10) || 100,
+      in: parseInt(process.env.FLOW_CONTROL_IN, 10) || 1,
+      in_time: 0
+    }
+  }));
+// return notificationDefaultFlowControl({
+//   ctx,
+//   channel: "account:update",
+//   result: "success" | "error" | "retry"
+// })

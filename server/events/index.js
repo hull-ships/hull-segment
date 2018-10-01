@@ -7,11 +7,8 @@ import page from "./page";
 import screen from "./screen";
 import identify from "./identify";
 
-export default {
-  track,
-  group,
-  alias,
-  page,
-  screen,
-  identify
-};
+const handlers = {
+  track, group, alias, page, screen, identify
+}
+
+export default handlers;

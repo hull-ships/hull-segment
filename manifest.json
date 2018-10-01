@@ -8,14 +8,6 @@
   "picture": "picture.png",
   "ui": false,
   "admin" : "admin.html",
-  "tabs": [
-    {
-      "title": "Credentials",
-      "url": "admin.html",
-      "size": "small",
-      "editable": false
-    }
-  ],
   "readme" : "readme.md",
   "version": "0.2.0",
   "deployment_settings":[
@@ -168,13 +160,69 @@
       "default" : false
     }
   ],
-  "resources": [],
-  "schedules" : [
+  "actions": [
+  ],
+  "tabs": [
     {
-      "url": "/status",
-      "type": "interval",
-      "value": "5"
+      "title": "Credentials",
+      "url": "admin.html",
+      "options": {
+        "handler": "admin",
+        "size": "small",
+        "editable": false
+      }
     }
   ],
-  "subscriptions" : [ { "url" : "/notifier" } ]
+  "schedules": [
+    {
+       "url": "/status",
+       "handler": "status",
+       "options": {
+         "interval": "5"
+       }
+    }
+  ],
+  "subscriptions" : [
+    {
+      "url" : "/notifier",
+      "channels": {
+        "user:update": {
+          "handler": "userUpdate",
+          "options": {}
+        },
+        "account:update": {
+          "handler": "accountUpdate",
+          "options": {}
+        }
+      }
+    }
+  ],
+  "batch" : [
+    {
+      "url" : "/batch",
+      "channels": {
+        "user:update": {
+          "handler": "userUpdate",
+          "options": {}
+        }
+      }
+    },
+    {
+      "url" : "/batch-accounts",
+      "channels": {
+        "account:update": {
+          "handler": "accountUpdate",
+          "options": {}
+        }
+      }
+    }
+  ],
+  "endpoints": [
+    {
+      "url": "/segment",
+      "method": "POST",
+      "handler": "segment",
+      "options": {}
+    }
+  ]
 }

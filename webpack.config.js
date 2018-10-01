@@ -1,11 +1,11 @@
 var path = require("path");
 var webpack = require("webpack");
 
-const isProduction = () => process.env.NODE_ENV === "development"
+const isProduction = () => process.env.NODE_ENV === "development";
 module.exports = {
   mode: isProduction() ? "production" : "development",
   entry: {
-    ship: path.join(__dirname, "src/index.js"),
+    ship: path.join(__dirname, "src/index.js")
   },
 
   output: {
@@ -14,9 +14,11 @@ module.exports = {
     publicPath: "/"
   },
 
-  plugins: [new webpack.DefinePlugin({
-    "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV)
-  })],
+  plugins: [
+    new webpack.DefinePlugin({
+      "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV)
+    })
+  ],
 
   module: {
     rules: [
@@ -27,27 +29,31 @@ module.exports = {
           path.resolve(__dirname, "test"),
           path.resolve(__dirname, "src")
         ],
-        use: [{
-          loader: 'babel-loader',
-          options: {
-            "presets": [
-              [
-                "babel-preset-env",
-                {
-                  "targets": {
-                    "browsers": "last 2 versions"
+        use: [
+          {
+            loader: "babel-loader",
+            options: {
+              presets: [
+                [
+                  "@babel/preset-env",
+                  {
+                    targets: {
+                      browsers: "last 2 versions"
+                    }
                   }
-                }
+                ],
+                "@babel/preset-flow"
               ],
-              "flow"
-            ],
-            "plugins": [
-              "transform-flow-comments",
-              ["transform-object-rest-spread", { "useBuiltIns": true }]
-            ]
+              plugins: [
+                "@babel/transform-flow-comments",
+                [
+                  "@babel/plugin-proposal-object-rest-spread",
+                  { useBuiltIns: true }
+                ]
+              ]
+            }
           }
-
-        }]
+        ]
       }
     ]
   }

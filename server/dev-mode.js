@@ -1,10 +1,10 @@
 // @flow
 
-import webpackMiddleware from "webpack-dev-middleware";
-import webpack from "webpack";
-import webpackConfig from "../webpack.config";
+const webpackMiddleware = require("webpack-dev-middleware");
+const webpack = require("webpack");
+const webpackConfig = require("../webpack.config");
 
-export default function devMode() {
+module.exports = function devMode(): string {
   const compiler = webpack(webpackConfig);
   return webpackMiddleware(compiler, {
     publicPath: webpackConfig.output.publicPath,

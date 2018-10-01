@@ -1,58 +1,56 @@
 // @flow
 
-import Hull from "hull";
-import { Cache } from "hull/lib/infra";
-import { clientMiddleware } from "hull/lib/middlewares";
-import redisStore from "cache-manager-redis";
-import express from "express";
+const Hull = require("hull");
+const { Cache } = require("hull/lib/infra");
+const redisStore = require("cache-manager-redis");
 
-import server from "./server";
+const status = require("./handlers/status");
+const userUpdate = require("./handlers/user");
+const accountUpdate = require("./handlers/account");
+const segment = require("./handlers/segment");
+const manifest = require("../manifest.json");
+const authMiddleware = require("./lib/segment-auth-middleware");
+const analyticsClientFactory = require("./analytics-client");
 
-if (process.env.LOG_LEVEL) {
-  Hull.Client.logger.transports.console.level = process.env.LOG_LEVEL;
-}
+const {
+  LOG_LEVEL,
+  PORT,
+  SECRET,
+  NODE_ENV,
+  OVERRIDE_FIREHOSE_URL,
+  REDIS_URL,
+  SHIP_CACHE_TTL
+} = process.env;
 
-Hull.Client.logger.transports.console.json = true;
+const analyticsClient = analyticsClientFactory();
+const user = userUpdate(analyticsClient);
+const account = accountUpdate(analyticsClient);
 
-const options = {
-  Hull,
-  clientMiddleware,
-  hostSecret: process.env.SECRET || "1234",
-  port: process.env.PORT || 8082,
-  devMode: process.env.NODE_ENV === "development",
-  onMetric: function onMetric(metric, value, ctx) {
-    console.log(`[${ctx.id}] segment.${metric}`, value);
-  }
-};
-
-let cache;
-
-if (process.env.REDIS_URL) {
-  cache = new Cache({
-    store: redisStore,
-    url: process.env.REDIS_URL,
-    ttl: process.env.SHIP_CACHE_TTL || 60
-  });
-} else {
-  cache = new Cache({
-    store: "memory",
-    max: process.env.SHIP_CACHE_MAX || 100,
-    ttl: process.env.SHIP_CACHE_TTL || 60
-  });
-}
-
-const app = express();
-const connector = new Hull.Connector({
-  hostSecret: options.hostSecret,
-  port: options.port,
-  clientConfig: {
-    firehoseUrl: process.env.OVERRIDE_FIREHOSE_URL
+Hull.start({
+  devMode: NODE_ENV === "development",
+  manifest,
+  middlewares: [authMiddleware],
+  handlers: {
+    segment,
+    status,
+    userUpdate: user,
+    accountUpdate: account,
+    userBatch: user,
+    accountBatch: account
   },
-  cache
+  connectorConfig: {
+    logLevel: LOG_LEVEL,
+    hostSecret: SECRET || "1234",
+    port: PORT || 8082,
+    clientConfig: {
+      firehoseUrl: OVERRIDE_FIREHOSE_URL
+    },
+    cache:
+      REDIS_URL &&
+      new Cache({
+        store: redisStore,
+        url: REDIS_URL,
+        ttl: SHIP_CACHE_TTL || 60
+      })
+  }
 });
-
-connector.setupApp(app);
-
-server(app, options);
-
-connector.startApp(app);

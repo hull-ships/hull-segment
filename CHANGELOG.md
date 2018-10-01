@@ -1,4 +1,5 @@
 ## v0.2.0
+- babel 7
 - [BREAKING] use consistent behaviour with other connectors: Send nothing by default, both in User and Account udpates
 - Use hull-node 0.14 with hull-client-node 2.0.0
 - add flow typing

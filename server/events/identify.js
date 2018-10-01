@@ -1,52 +1,55 @@
 // @flow
 
-import { isEmpty, reduce, includes } from "lodash";
-import scoped from "../scope-hull-client";
+import { isEmpty, reduce, includes } from 'lodash';
+import scoped from '../scope-hull-client';
+import type { HullContext, SegmentIncomingIdentify } from '../types';
 
 const ALIASED_FIELDS = {
-  lastname: "last_name",
-  firstname: "first_name",
-  createdat: "created_at"
+  lastname: 'last_name',
+  firstname: 'first_name',
+  createdat: 'created_at'
 };
 
 const IGNORED_TRAITS = [
-  "id",
-  "external_id",
-  "guest_id",
-  "uniqToken",
-  "visitToken"
+  'id',
+  'external_id',
+  'guest_id',
+  'uniqToken',
+  'visitToken'
 ];
 
-function updateUser(hull, user, shipSettings, active) {
+function update(client, message, useHullId, shipSettings, active) {
   try {
-    const { userId, anonymousId, traits = {} } = user;
+    const { userId, anonymousId, traits = {} } = message;
     const { email } = traits || {};
 
-    const asUser = hull.asUser({
+    const asUser = client.asUser({
       external_id: userId,
       email,
       anonymous_id: anonymousId
     });
 
     if (shipSettings.ignore_segment_userId === true && !email && !anonymousId) {
-      const logPayload = { id: user.id, anonymousId, email };
-      asUser.logger.info("incoming.user.skip", {
-        reason:
-          "No email address or anonymous ID present when ignoring segment's user ID.",
+      const logPayload = { id: message.id, anonymousId, email };
+      const reason =
+        "No email address or anonymous ID present when ignoring segment's user ID.";
+      asUser.logger.info('incoming.user.skip', {
+        reason,
         logPayload
       });
-      return false;
+      return Promise.reject(reason);
     }
     if (!userId && !anonymousId) {
-      const logPayload = { id: user.id, userId, anonymousId };
-      asUser.logger.info("incoming.user.skip", {
-        reason: "No user ID or anonymous ID present.",
+      const logPayload = { id: message.id, userId, anonymousId };
+      const reason = 'No user ID or anonymous ID present.';
+      asUser.logger.info('incoming.user.skip', {
+        reason,
         logPayload
       });
-      return false;
+      return Promise.reject(reason);
     }
 
-    return scoped(hull, user, shipSettings, { active })
+    return scoped(client, message, useHullId, shipSettings, { active })
       .traits(traits)
       .then(
         (/* response */) => {
@@ -62,9 +65,20 @@ function updateUser(hull, user, shipSettings, active) {
   }
 }
 
-export default function handleIdentify(payload, { hull, metric, ship }) {
-  const { context, traits, userId, anonymousId, integrations = {} } = payload;
+export default function handleIdentify(
+  ctx: HullContext,
+  message: SegmentIncomingIdentify
+) {
+  const { client, connector, metric } = ctx;
+  const {
+    context,
+    traits = {},
+    userId,
+    anonymousId,
+    integrations = {}
+  } = message;
   const { active = false } = context || {};
+
   const user = reduce(
     traits || {},
     (u, v, k) => {
@@ -79,29 +93,32 @@ export default function handleIdentify(payload, { hull, metric, ship }) {
     { userId, anonymousId, traits: {} }
   );
 
-  if (integrations.Hull && integrations.Hull.id === true) {
-    user.hullId = user.userId;
-    delete user.userId;
-  }
   if (!isEmpty(user.traits)) {
-    const updating = updateUser(hull, user, ship.settings, active);
+    const useHullId = integrations.Hull && integrations.Hull.id === true;
+    const updating = update(
+      client,
+      user,
+      useHullId,
+      connector.settings,
+      active
+    );
 
     updating.then(
-      ({ t = {} }) => {
-        metric("request.identify.updateUser");
-        hull
+      ({ traits = {} }) => {
+        metric.increment('request.identify.updateUser');
+        client
           .asUser({
-            email: t.email,
-            externald_id: userId,
+            email: traits.email,
+            external_id: userId,
             anonymous_id: anonymousId
           })
-          .logger.info("incoming.user.success", { traits: t });
+          .logger.info('incoming.user.success', { traits });
       },
       error => {
-        metric("request.identify.updateUser.error");
-        hull
-          .asUser({ externald_id: userId, anonymous_id: anonymousId })
-          .logger.error("incoming.user.error", { errors: error });
+        metric.increment('request.identify.updateUser.error');
+        client
+          .asUser({ external_id: userId, anonymous_id: anonymousId })
+          .logger.error('incoming.user.error', { errors: error });
       }
     );
 

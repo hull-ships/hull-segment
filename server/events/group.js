@@ -1,26 +1,19 @@
 // @flow
 
 import Promise from "bluebird";
-import type { Hull } from "hull";
-import type { HullClient, SegmentShip, SegmentGroup, User } from "../types";
-
-type LocalContext = {
-  hull: Hull,
-  ship: SegmentShip
-};
+import type { HullContext, SegmentIncomingGroup } from "../types";
 
 export default function handleGroup(
-  event: SegmentGroup,
-  { hull, ship }: LocalContext
+  { client, metric }: HullContext,
+  message: SegmentIncomingGroup
 ) {
-  if (!event || !event.groupId) return Promise.resolve();
+  const { groupId, userId, traits } = message;
+  if (!message || !groupId) return Promise.resolve();
 
-  const scopedClient = event.userId
-    ? hull
-        .asUser({ external_id: event.userId })
-        .account({ external_id: event.groupId })
-    : hull.asAccount({ external_id: event.groupId });
-  scopedClient.logger.info(`incoming.account.success`, event.traits);
-  scopedClient.metric.increment(`request.group.success`);
-  return scopedClient.traits(event.traits);
+  const scopedClient = userId
+    ? client.asUser({ external_id: userId }).account({ external_id: groupId })
+    : client.asAccount({ external_id: groupId });
+  scopedClient.logger.info(`incoming.account.success`, traits);
+  metric.increment(`request.group.success`);
+  return scopedClient.traits(traits);
 }

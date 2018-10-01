@@ -1,10 +1,18 @@
 // @flow
 
 import _ from "lodash";
+import type { HullSendResponse } from "hull";
+import type { HullContext } from "../types";
 
-export default function statusCheck(req, res) {
-  const { ship, client } = req.hull;
-  const { private_settings, settings } = ship;
+module.exports = function statusCheck(ctx: HullContext): HullSendResponse {
+  const { connector = {} } = ctx;
+  const { private_settings, settings } = connector;
+  if (!connector) {
+    return Promise.resolve({
+      status: "error",
+      message: "Invalid credentials passed"
+    });
+  }
   const messages = [];
   let status = "ok";
   const {
@@ -19,6 +27,7 @@ export default function statusCheck(req, res) {
     send_events,
     synchronized_account_properties,
     synchronized_properties,
+    synchronized_account_segments,
     synchronized_segments
   } = private_settings;
 
@@ -48,14 +57,20 @@ export default function statusCheck(req, res) {
     );
   }
 
+  if (_.size(synchronized_segments) && !_.size(synchronized_properties)) {
+    status = "warning";
+    messages.push(
+      "Some segments are listed to send, but no properties are listed. Profiles will probably be incomplete"
+    );
+  }
+
   if (
-    _.size(synchronized_segments) &&
-    !_.size(synchronized_properties) &&
+    _.size(synchronized_account_segments) &&
     !_.size(synchronized_account_properties)
   ) {
     status = "warning";
     messages.push(
-      "Some segments are listed to send, but no properties are listed. Profiles will probably be incomplete"
+      "Some account segments are listed to send, but no account properties are listed. Profiles will probably be incomplete"
     );
   }
 
@@ -94,6 +109,6 @@ export default function statusCheck(req, res) {
     );
   }
 
-  res.json({ messages, status });
-  return client.put(`${req.hull.ship.id}/status`, { status, messages });
-}
+  // return client.put(`${connector.id}/status`, { status, messages });
+  return Promise.resolve({ messages, status });
+};

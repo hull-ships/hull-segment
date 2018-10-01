@@ -1,66 +1,57 @@
-// @flow
-
-import jwt from "jwt-simple";
-import Promise from "bluebird";
-import _ from "lodash";
-
-import { notificationHandler, batchHandler } from "hull/lib/handlers";
-
-import type {
-  HullContext,
-  HullUserUpdateMessage,
-  HullAccountUpdateMessage
-} from "hull";
-
-import devMode from "./dev-mode";
-import SegmentHandler from "./handler";
-import handlers from "./events";
-import errorHandler from "./handlers/error";
-import hullHandlers from "./handlers";
-
-import statusHandler from "./status";
-
-module.exports = function server(app: *, options: * = {}) {
-  const { Hull, hostSecret, onMetric, clientMiddleware } = options;
-
-  if (options.devMode) {
-    app.use(devMode());
-  }
-
-  app.get("/admin.html", clientMiddleware, (req, res) => {
-    const { config } = req.hull;
-    const apiKey = jwt.encode(config, hostSecret);
-    const encoded = new Buffer(apiKey).toString("base64");
-    const hostname = req.hostname;
-    res.render("admin.html", {
-      apiKey,
-      encoded,
-
-      hostname
-    });
-  });
-
-  app.post("/notifier", notificationHandler(hullHandlers));
-  app.post("/batch", batchHandler(hullHandlers));
-  app.post("/batch-accounts", batchHandler(hullHandlers));
-
-  const segment = SegmentHandler({
-    onError(err) {
-      console.warn("Error handling segment event", err, err && err.stack);
-    },
-    onMetric,
-    clientMiddleware,
-    Hull,
-    handlers
-  });
-
-  app.post("/segment", segment);
-  app.all("/status", statusHandler);
-
-  // Error Handler
-  app.use(errorHandler);
-
-  app.exit = () => segment.exit();
-
-  return app;
-};
+// // @flow
+//
+// const Promise = require("bluebird");
+// const _ = require("lodash");
+// const express = require("express");
+// const segmentAuthMiddleware = require("./lib/segment-auth-middleware");
+// const {
+//   scheduleHandler,
+//   notificationHandler,
+//   batchHandler
+// } = require("hull/lib/handlers");
+//
+// const devmode = require("./dev-mode");
+// const SegmentHandler = require("./segment-handler");
+// const segmentEvents = require("./events");
+// const HullHandlersFactory = require("./handlers");
+// const errorHandler = require("./handlers/error");
+// const statusHandler = require("./handlers/status");
+// const debug = require("debug")("hull-segment:server");
+//
+// import type { $Application, $Request, $Response } from "express";
+// import type { HullServerConfig } from "hull";
+// import type { HullRequest } from "./types";
+//
+// module.exports = function server({
+//   Hull,
+//   devMode,
+//   connectorConfig
+// }: HullServerConfig) {
+//
+//   if (devMode) {
+//     app.use(devmode());
+//   }
+//
+//   const hullHandlers = HullHandlersFactory();
+//   app.post("/notifier", notificationHandler(hullHandlers));
+//   app.post("/batch", batchHandler(hullHandlers));
+//   app.post("/batch-accounts", batchHandler(hullHandlers));
+//
+//   app.use(
+//     "/segment",
+//     SegmentHandler({
+//       Hull,
+//       handlers: segmentEvents
+//     })
+//   );
+//   app.all("/status", scheduleHandler(statusHandler));
+//
+//   // Error Handler
+//   app.use(errorHandler);
+//
+//   // Can't find any documentation about this anywhere. Care to explain ?
+//   // app.exit = () => segment.exit();
+//
+//   connector.startApp(app);
+//   return app;
+// };
