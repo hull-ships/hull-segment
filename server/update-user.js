@@ -79,21 +79,23 @@ export default function updateUserFactory(analyticsClient) {
     const context = { active: false, ip: 0 };
     let ret = false;
 
+    // First check to see if the user is in a syncronized segments
+    // if it is not, there is no reason to keep going, just exit now...
+    const segment_ids = _.map(segments, "id");
+    if (
+      !ignoreFilters &&
+      synchronized_segments.length > 0 && // Should we move to "Send no one by default ?"
+      //  -> good question, because if you don't have any syncronized segments seems like we update by default
+      !_.intersection(segment_ids, synchronized_segments).length
+      ) {
+      asUser.logger.info("outgoing.user.skip", { reason: "not matching any segment", segment_ids, traits });
+      return false;
+    }
+
     if (!_.isEmpty(_.get(changes, "segments", {})) ||
         _.intersection(synchronized_properties, changedUserAttributes).length > 0 ||
         !_.isEmpty(_.get(changes, "account_segments", {})) ||
-        _.intersection(synchronized_account_properties, changedAccountAttributes).length > 0 ||
-        ignoreFilters === true) {
-      const segment_ids = _.map(segments, "id");
-      if (
-        !ignoreFilters &&
-        synchronized_segments.length > 0 && // Should we move to "Send no one by default ?"
-        !_.intersection(segment_ids, synchronized_segments).length
-        ) {
-        asUser.logger.info("outgoing.user.skip", { reason: "not matching any segment", segment_ids, traits });
-        return false;
-      }
-
+        _.intersection(synchronized_account_properties, changedAccountAttributes).length > 0) {
       try {
         // Add group if available
         if (handle_groups && groupId && userId) {

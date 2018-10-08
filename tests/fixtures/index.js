@@ -4,5 +4,6 @@ module.exports = {
   identify: require('./identify.json'),
   page: require('./page.json'),
   screen: require('./screen.json'),
-  track: require('./track.json')
+  track: require('./track.json'),
+  userUpdateEventPayload: require('./user-update-event-payload.json'),
 };
