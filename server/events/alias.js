@@ -1,3 +1,3 @@
-export default function handleAlias(/* alias ,{ hull, ship }*/) {
+export default function handleAlias(/* alias ,{ hull, ship } */) {
 
 }

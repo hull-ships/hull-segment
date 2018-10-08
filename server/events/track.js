@@ -59,7 +59,7 @@ export default function handleTrack(payload, { hull, metric, ship }) {
 
   const scopedUser = scoped(hull, payload, ship.settings);
   return scopedUser.track(event, properties, trackContext).then(
-    result => {
+    (result) => {
       scopedUser.logger.info("incoming.track.success", {
         payload,
         trackContext,
@@ -68,7 +68,7 @@ export default function handleTrack(payload, { hull, metric, ship }) {
       });
       return result;
     },
-    message => {
+    (message) => {
       metric("request.track.error");
       scopedUser.logger.error("incoming.track.error", { payload, errors: message });
       return Promise.reject();
