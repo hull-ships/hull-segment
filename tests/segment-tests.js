@@ -8,11 +8,14 @@ import request from "supertest";
 import sinon from "sinon";
 import assert from "assert";
 import jwt from "jwt-simple";
-
+import simpleMock from "simple-mock";
+import updateUser from "../server/update-user";
 
 const server = require("../server/server");
+const { ContextMock } = require("./helper/connector-mock");
 
-const { track, identify, page, screen } = require("./fixtures");
+
+const { track, identify, page, screen, userUpdateEventPayload } = require("./fixtures");
 
 // const API_RESPONSES = {
 //   default: {
@@ -381,6 +384,65 @@ describe("Segment Ship", () => {
               done();
             });
       });
+    });
+  });
+
+  describe("Outgoing User Update Messages", () => {
+    it("Event sent in User Update - Not in Segment", (done) => {
+
+      const ctxMock = new ContextMock();
+      ctxMock.ship = userUpdateEventPayload.connector;
+      ctxMock.connector = userUpdateEventPayload.connector;
+
+      const message = userUpdateEventPayload.messages[0];
+
+      const analytics = {};
+      simpleMock.mock(analytics, "group").callFn(() => console.log("group"));
+      simpleMock.mock(analytics, "enqueue").callFn(() => {});
+      simpleMock.mock(analytics, "page").callFn(() => {});
+      simpleMock.mock(analytics, "track").callFn(() => {});
+      simpleMock.mock(analytics, "identify").callFn(() => true);
+
+      const analyticsClient = simpleMock.stub().returnWith(analytics);
+
+      const updateUserFunction = updateUser(analyticsClient);
+      const updatedAttributes = updateUserFunction(
+        {
+          message
+        },
+        {
+          ship: ctxMock.ship,
+          hull: ctxMock.client
+        }
+      );
+
+      const infoLogMock = ctxMock.client.logger.info;
+
+      // In this first scenario, the user is in the segment we're synchronizing
+      // But because there are no attribute updates, so we return false
+      // But in this case, it's an event incoming not an attribute, so we still get a successful outgoing event
+      assert(updatedAttributes === false);
+      assert(infoLogMock.lastCall.args[0] === "outgoing.event.success");
+      assert(infoLogMock.calls[infoLogMock.calls.length - 2].args[0] === "outgoing.user.skip");
+
+      ctxMock.ship.private_settings.synchronized_segments = ["notarealsegment"];
+
+      const updatedAttributes2 = updateUserFunction(
+        {
+          message
+        },
+        {
+          ship: ctxMock.ship,
+          hull: ctxMock.client
+        }
+      );
+
+      // In this second scenario, we set the synchronized segment to be different than the one the user is in
+      // We still get false because no attribute updates
+      // But now we also skip anything having to do with the user
+      assert(updatedAttributes2 === false);
+      assert(infoLogMock.lastCall.args[0] === "outgoing.user.skip");
+      done();
     });
   });
 
