@@ -47,7 +47,7 @@ function updateUser(hull, user, shipSettings, active) {
       .traits(traits)
       .then(
         (/* response */) => ({ skip: false, traits }),
-        error => {
+        (error) => {
           error.params = traits;
           throw error;
         }
@@ -82,7 +82,7 @@ export default function handleIdentify(payload, { hull, metric, ship }) {
     const updating = updateUser(hull, user, ship.settings, active);
 
     updating.then(
-      ({ skip = false, traits = {} }) => {
+      ({ skip = false, traits: t = {} }) => {
         metric("request.identify.updateUser");
         hull
           .asUser({
@@ -95,7 +95,7 @@ export default function handleIdentify(payload, { hull, metric, ship }) {
             traits: t
           });
       },
-      error => {
+      (error) => {
         metric("request.identify.updateUser.error");
         hull
           .asUser({ externald_id: userId, anonymous_id: anonymousId })

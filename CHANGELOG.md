@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.21
+- [bugfix] add payloads to incoming log lines
+- [maintenance] apply styling changes
+
 ## v0.1.20
 
 - [bugfix] Add account segments to outgoing group calls as `hull_segments` property
