@@ -403,6 +403,12 @@ describe("Segment Ship", () => {
         identify: () => true,
       };
 
+      sinon.spy(analytics, "group");
+      sinon.spy(analytics, "enqueue");
+      sinon.spy(analytics, "page");
+      sinon.spy(analytics, "track");
+      sinon.spy(analytics, "identify");
+
       const analyticsClient = () => analytics;
 
       const updateUserFunction = updateUser(analyticsClient);
@@ -422,6 +428,10 @@ describe("Segment Ship", () => {
       // But because there are no attribute updates, so we return false
       // But in this case, it's an event incoming not an attribute, so we still get a successful outgoing event
       assert(updatedAttributes === false);
+      assert(analytics.page.getCalls().length === 1);
+      assert(analytics.track.getCalls().length === 0);
+      assert(analytics.group.getCalls().length === 0);
+      assert(analytics.identify.getCalls().length === 0);
       assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 1].args[0] === "outgoing.event.success");
       assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 2].args[0] === "outgoing.user.skip");
 
@@ -441,6 +451,10 @@ describe("Segment Ship", () => {
       // We still get false because no attribute updates
       // But now we also skip anything having to do with the user
       assert(updatedAttributes2 === false);
+      assert(analytics.page.getCalls().length === 1);
+      assert(analytics.track.getCalls().length === 0);
+      assert(analytics.group.getCalls().length === 0);
+      assert(analytics.identify.getCalls().length === 0);
       assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 1].args[0] === "outgoing.user.skip");
       done();
     });
