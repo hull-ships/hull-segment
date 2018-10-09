@@ -23,7 +23,7 @@ const options = {
 
 
 if (process.env.LIBRATO_TOKEN && process.env.LIBRATO_USER) {
-  const librato = require("librato-node");
+  const librato = require("librato-node"); // eslint-disable-line global-require
   librato.configure({
     email: process.env.LIBRATO_USER,
     token: process.env.LIBRATO_TOKEN
