@@ -8,7 +8,6 @@ import request from "supertest";
 import sinon from "sinon";
 import assert from "assert";
 import jwt from "jwt-simple";
-import simpleMock from "simple-mock";
 import updateUser from "../server/update-user";
 
 const server = require("../server/server");
@@ -396,14 +395,15 @@ describe("Segment Ship", () => {
 
       const message = userUpdateEventPayload.messages[0];
 
-      const analytics = {};
-      simpleMock.mock(analytics, "group").callFn(() => console.log("group"));
-      simpleMock.mock(analytics, "enqueue").callFn(() => {});
-      simpleMock.mock(analytics, "page").callFn(() => {});
-      simpleMock.mock(analytics, "track").callFn(() => {});
-      simpleMock.mock(analytics, "identify").callFn(() => true);
+      const analytics = {
+        group: () => {},
+        enqueue: () => {},
+        page: () => {},
+        track: () => {},
+        identify: () => true,
+      };
 
-      const analyticsClient = simpleMock.stub().returnWith(analytics);
+      const analyticsClient = () => analytics;
 
       const updateUserFunction = updateUser(analyticsClient);
       const updatedAttributes = updateUserFunction(
@@ -422,8 +422,8 @@ describe("Segment Ship", () => {
       // But because there are no attribute updates, so we return false
       // But in this case, it's an event incoming not an attribute, so we still get a successful outgoing event
       assert(updatedAttributes === false);
-      assert(infoLogMock.lastCall.args[0] === "outgoing.event.success");
-      assert(infoLogMock.calls[infoLogMock.calls.length - 2].args[0] === "outgoing.user.skip");
+      assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 1].args[0] === "outgoing.event.success");
+      assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 2].args[0] === "outgoing.user.skip");
 
       ctxMock.ship.private_settings.synchronized_segments = ["notarealsegment"];
 
@@ -441,7 +441,7 @@ describe("Segment Ship", () => {
       // We still get false because no attribute updates
       // But now we also skip anything having to do with the user
       assert(updatedAttributes2 === false);
-      assert(infoLogMock.lastCall.args[0] === "outgoing.user.skip");
+      assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 1].args[0] === "outgoing.user.skip");
       done();
     });
   });

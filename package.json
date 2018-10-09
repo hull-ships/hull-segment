@@ -81,7 +81,6 @@
     "nodemon": "^1.10.0",
     "sinon": "^1.17.4",
     "supertest": "^3.0.0",
-    "simple-mock": "^0.8.0",
     "updtr": "^1.0.0",
     "watch": "^1.0.2"
   }
