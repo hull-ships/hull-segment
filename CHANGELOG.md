@@ -1,6 +1,11 @@
 # CHANGELOG
 
+## v0.1.22
+
+- [bugfix] make sure that user-events are send out only if given user belongs to filtered segments
+
 ## v0.1.21
+
 - [bugfix] add payloads to incoming log lines
 - [maintenance] apply styling changes
 
