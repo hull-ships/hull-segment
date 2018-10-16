@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.23
+
+- [hotfix] ignore filters on batch requests
+
 ## v0.1.22
 
 - [bugfix] make sure that user-events are send out only if given user belongs to filtered segments
