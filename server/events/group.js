@@ -6,7 +6,6 @@ const MAX_BATCH_SIZE = parseInt(process.env.MAX_BATCH_SIZE || 100, 10);
 const BATCH_THROTTLE = parseInt(process.env.BATCH_THROTTLE || 5000, 10);
 
 export class GroupBatchHandler {
-
   constructor({ hull, ship, metric }) {
     this.hull = hull;
     this.ship = ship;
@@ -22,7 +21,8 @@ export class GroupBatchHandler {
 
   static handle(event, { hull, ship, metric }) {
     // eslint-disable-next-line no-multi-assign
-    const handler = BATCH_HANDLERS[ship.id] = BATCH_HANDLERS[ship.id] || new GroupBatchHandler({ hull, ship, metric });
+    const handler = (BATCH_HANDLERS[ship.id] =
+      BATCH_HANDLERS[ship.id] || new GroupBatchHandler({ hull, ship, metric }));
     handler.add(event, { hull, ship });
 
     if (Object.keys(handler.groups).length > MAX_BATCH_SIZE) {
@@ -40,7 +40,9 @@ export class GroupBatchHandler {
     this.ship = ship;
     const { userId, groupId, traits } = event;
     const group = this.groups[groupId] || { groupId, userIds: [], traits: {} };
-    group.traits = Object.assign({}, group.traits || {}, traits, { id: groupId });
+    group.traits = Object.assign({}, group.traits || {}, traits, {
+      id: groupId
+    });
     if (userId && !group.userIds.includes(userId)) {
       group.userIds.push(userId);
     }
@@ -69,37 +71,45 @@ export class GroupBatchHandler {
 
     return new Promise((resolve /* , reject */) => {
       const users = {};
-
-      (function fetch(page = 1) {
+      function fetch(page = 1) {
         const pageParams = Object.assign({}, params, { page });
         const startTime = new Date();
-        return hull.post("search/user_reports", pageParams).then(({ data, pagination }) => {
-          metric("searchResponseTime", new Date() - startTime);
-          data.map((u) => {
-            users[u.id] = u;
-            return u;
+        return hull
+          .post("search/user_reports", pageParams)
+          .then(({ data, pagination }) => {
+            metric("searchResponseTime", new Date() - startTime);
+            data.map((u) => {
+              users[u.id] = u;
+              return u;
+            });
+            if (pagination.page >= pagination.pages) {
+              resolve(values(users));
+            } else {
+              fetch(page + 1);
+            }
           });
-          if (pagination.page >= pagination.pages) {
-            resolve(values(users));
-          } else {
-            fetch(page + 1);
-          }
-        });
-      }());
+      }
+      fetch();
     });
   }
 
   getUsersByGroup(groupIds = []) {
-    return this.searchUsers(groupIds).then((users) => {
-      return users.reduce((groups, user) => {
-        const groupId = user["traits_group/id"];
-        groups[groupId] = groups[groupId] || {};
-        if (user.external_id) {
-          groups[groupId][user.external_id] = user;
-        }
-        return groups;
-      }, groupIds.reduce((g, i) => { g[i] = {}; return g; }, {}));
-    });
+    return this.searchUsers(groupIds).then(users =>
+      users.reduce(
+        (groups, user) => {
+          const groupId = user["traits_group/id"];
+          groups[groupId] = groups[groupId] || {};
+          if (user.external_id) {
+            groups[groupId][user.external_id] = user;
+          }
+          return groups;
+        },
+        groupIds.reduce((g, i) => {
+          g[i] = {};
+          return g;
+        }, {})
+      )
+    );
   }
 
   updateUsers(users, traits) {
@@ -107,24 +117,29 @@ export class GroupBatchHandler {
   }
 
   updateUser(user, traits) {
-    const diff = reduce(traits, (t, v, k) => {
-      // drop nested properties
-      if (v !== user[`traits_group/${k}`] && typeof (v) !== "object") {
-        t[`group/${k}`] = v;
-      }
-      return t;
-    }, {});
+    const diff = reduce(
+      traits,
+      (t, v, k) => {
+        // drop nested properties
+        if (v !== user[`traits_group/${k}`] && typeof v !== "object") {
+          t[`group/${k}`] = v;
+        }
+        return t;
+      },
+      {}
+    );
 
     if (!isEmpty(diff)) {
       this.metric("updateUser");
 
       const asUser = this.hull.asUser(user.id);
-      return asUser.traits(diff).then(() => {
-        asUser.logger.info("incoming.group.success", user);
-        return { as: user.id, traits: diff };
-      }, (error) => {
-        asUser.logger.error("incoming.group.error", { errors: error });
-      });
+      return asUser.traits(diff).then(
+        () => {
+          asUser.logger.info("incoming.group.success", user);
+          return { as: user.id, traits: diff };
+        },
+        error => asUser.logger.error("incoming.group.error", { errors: error })
+      );
     }
     return Promise.resolve({ as: user.id });
   }
@@ -136,33 +151,44 @@ export class GroupBatchHandler {
     const groupIds = Object.keys(this.groups);
     const groups = this.groups;
     this.groups = {};
-    const ret = this.getUsersByGroup(groupIds).then((usersByGroup) => {
-      return Promise.all(map(usersByGroup, (groupUsers, groupId) => {
-        const { traits, userIds } = groups[groupId] || {};
-        const currentUsers = (userIds || []).reduce((cids, id) => {
-          cids[id] = { id: { external_id: id } };
-          return cids;
-        }, {});
+    const ret = this.getUsersByGroup(groupIds).then(usersByGroup =>
+      Promise.all(
+        map(usersByGroup, (groupUsers, groupId) => {
+          const { traits, userIds } = groups[groupId] || {};
+          const currentUsers = (userIds || []).reduce((cids, id) => {
+            cids[id] = { id: { external_id: id } };
+            return cids;
+          }, {});
 
-        const users = values(Object.assign({}, currentUsers, groupUsers));
+          const users = values(Object.assign({}, currentUsers, groupUsers));
 
-        this.hull.logger.debug("group.flush", { stats: this.stats, shipId: this.ship.id, groupId, users: users.length, traits });
+          this.hull.logger.debug("group.flush", {
+            stats: this.stats,
+            shipId: this.ship.id,
+            groupId,
+            users: users.length,
+            traits
+          });
 
-        return this.updateUsers(users, traits).then((res) => {
-          this.status = "idle";
-          return { users: res, groupId };
-        });
-      }));
-    });
+          return this.updateUsers(users, traits).then((res) => {
+            this.status = "idle";
+            return { users: res, groupId };
+          });
+        })
+      )
+    );
 
-    ret.then(() => {
-      this.stats.success += 1;
-      this.stats.flushing -= 1;
-    }, (err) => {
-      this.hull.logger.debug("group.flush.error", err);
-      this.stats.error += 1;
-      this.stats.flushing -= 1;
-    });
+    ret.then(
+      () => {
+        this.stats.success += 1;
+        this.stats.flushing -= 1;
+      },
+      (err) => {
+        this.hull.logger.debug("group.flush.error", err);
+        this.stats.error += 1;
+        this.stats.flushing -= 1;
+      }
+    );
     return ret;
   }
 }
@@ -191,12 +217,17 @@ handleGroupOld.flush = function flushGroup() {
 
 function handleGroupNew(event, { hull }) {
   if (event && event.groupId) {
-    let scopedClient;
-    if (event.userId) {
-      scopedClient = hull.asUser({ external_id: event.userId })
-        .account({ external_id: event.groupId });
-    } else {
-      scopedClient = hull.asAccount({ external_id: event.groupId });
+    const scopedClient = event.userId
+      ? hull
+          .asUser({ external_id: event.userId })
+          .account({ external_id: event.groupId })
+      : hull.asAccount({ external_id: event.groupId });
+
+    try {
+      scopedClient.logger.info("incoming.account.success", { payload: event });
+    } catch (e) {
+      console.log("LOGGER ERROR");
+      console.log(e);
     }
 
     return scopedClient.traits(event.traits);

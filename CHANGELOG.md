@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.24
+
+- [hotfix] fix `incoming.account.success` loggin
+
 ## v0.1.23
 
 - [hotfix] ignore filters on batch requests
