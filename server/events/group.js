@@ -226,6 +226,7 @@ function handleGroupNew(event, { hull }) {
     try {
       scopedClient.logger.info("incoming.account.success", { payload: event });
     } catch (e) {
+      console.log('LOGGER ERROR');
       console.log(e);
     }
 
