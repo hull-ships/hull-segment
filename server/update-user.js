@@ -128,9 +128,19 @@ export default function updateUserFactory(analyticsClient) {
           if (!_.isEmpty(accountTraits)) {
             hull.logger.debug("group.send", { groupId: accountId, traits: accountTraits, context });
             analytics.group({ groupId: accountId, anonymousId, userId, traits: accountTraits, context, integrations });
+            asUser.account().logger.info("outgoing.account.success", { groupId: accountId, traits: accountTraits, context });
+          } else {
+            asUser.account().logger.info("outgoing.account.skip", { reason: "Empty traits payload", groupId: accountId, traits: accountTraits, context });
           }
-
-          asUser.account().logger.info("outgoing.account.success", { groupId: accountId, traits: accountTraits, context });
+        } else {
+          asUser.account().logger.info("outgoing.account.skip", {
+            reason: "doesn't match rules for sending",
+            handle_groups,
+            handle_accounts,
+            groupId,
+            accountId,
+            publicAccountIdField
+          });
         }
       } catch (err) {
         console.warn("Error processing group update", err);
