@@ -1,4 +1,4 @@
-import { reduce, isEmpty, values, map, throttle } from "lodash";
+import { reduce, isEmpty, values, map, throttle, get } from "lodash";
 import Promise from "bluebird";
 
 const BATCH_HANDLERS = {};
@@ -217,11 +217,21 @@ handleGroupOld.flush = function flushGroup() {
 
 function handleGroupNew(event, { hull }) {
   if (event && event.groupId) {
-    const scopedClient = event.userId
-      ? hull
+    const accountIdentity = { external_id: event.groupId };
+
+    const domain = get(event, "traits.domain");
+    if (!isEmpty(domain)) {
+      accountIdentity.domain = domain;
+    }
+
+    let scopedClient;
+    if (event.userId) {
+      scopedClient = hull
           .asUser({ external_id: event.userId })
-          .account({ external_id: event.groupId })
-      : hull.asAccount({ external_id: event.groupId });
+          .account(accountIdentity);
+    } else {
+      scopedClient = hull.asAccount(accountIdentity);
+    }
 
     try {
       scopedClient.logger.info("incoming.account.success", { payload: event });
