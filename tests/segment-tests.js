@@ -355,6 +355,58 @@ describe("Segment Ship", () => {
         });
     });
 
+    it("group call from segment should pull domain from traits", (done) => {
+      shipData = {
+        settings: { handle_accounts: true }
+      };
+      const body = {
+        context: {
+          library: {
+            name: "analytics-node",
+            version: "3.3.0"
+          }
+        },
+        groupId: "BggDBQ4EBAMBDQkLBAcCDA",
+        messageId: "node-74f9cac816a0076169db7321e5956638-0beacb8e-f988-4797-9320-dc3a55688b15",
+        timestamp: "2018-10-25T14:49:26.269Z",
+        traits: {
+          account_status: "activated",
+          name: "Hull Testpayload for Segment",
+          domain: "somedomain.com",
+          some_description: "a hull test payload description"
+        },
+        type: "group",
+        userId: "DwcOAwYLAAMDCgMCBAMGCg",
+        receivedAt: "2018-10-25T14:49:26.274Z",
+        sentAt: "2018-10-25T14:49:25.887Z",
+        integrations: {},
+        originalTimestamp: "2018-10-25T14:49:25.882Z"
+      };
+
+      sendRequest({ body, query: config })
+        .expect(200)
+        .expect({ message: "thanks" })
+        .end(() => {
+          const payload = {
+            account_status: "activated",
+            name: "Hull Testpayload for Segment",
+            domain: "somedomain.com",
+            some_description: "a hull test payload description"
+          };
+
+          setTimeout(() => {
+            const tReq = _.find(requests, { url: "/api/v1/firehose" });
+            const tokenClaims = jwt.decode(tReq.body.batch[0].headers["Hull-Access-Token"], hullSecret);
+            assert(_.isEqual(tokenClaims["io.hull.asAccount"], { domain: "somedomain.com", external_id: "BggDBQ4EBAMBDQkLBAcCDA" }));
+            const claims = jwt.decode(tReq.body.batch[0].headers["Hull-Access-Token"], null, true);
+            assert(claims["io.hull.subjectType"] === "account");
+            assert(tReq.body.batch[0].type === "traits");
+            assert(_.isEqual(tReq.body.batch[0].body, payload));
+            done();
+          }, 10);
+        });
+    });
+
 
     it("should Hull.track on screen event by default", (done) => {
       shipData = {
@@ -388,7 +440,6 @@ describe("Segment Ship", () => {
 
   describe("Outgoing User Update Messages", () => {
     it("Event sent in User Update - Not in Segment", (done) => {
-
       const ctxMock = new ContextMock();
       ctxMock.ship = userUpdateEventPayload.connector;
       ctxMock.connector = userUpdateEventPayload.connector;
