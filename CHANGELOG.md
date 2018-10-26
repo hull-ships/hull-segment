@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.1.25
+
+- [hotfix] when domain is in the incoming traits, add it to the account identification as well, that way we're not just using the groupId to identify the account
+- [hotfix] additional logging for outgoing account successes and skips
+
 ## v0.1.24
 
 - [hotfix] fix `incoming.account.success` loggin
