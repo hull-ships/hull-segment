@@ -372,6 +372,7 @@ describe("Segment Ship", () => {
         traits: {
           account_status: "activated",
           name: "Hull Testpayload for Segment",
+          domain: "somedomain.com",
           some_description: "a hull test payload description"
         },
         type: "group",
@@ -389,13 +390,14 @@ describe("Segment Ship", () => {
           const payload = {
             account_status: "activated",
             name: "Hull Testpayload for Segment",
+            domain: "somedomain.com",
             some_description: "a hull test payload description"
           };
 
           setTimeout(() => {
             const tReq = _.find(requests, { url: "/api/v1/firehose" });
             const tokenClaims = jwt.decode(tReq.body.batch[0].headers["Hull-Access-Token"], hullSecret);
-            assert(_.isEqual(tokenClaims["io.hull.asAccount"], { external_id: "BggDBQ4EBAMBDQkLBAcCDA" }));
+            assert(_.isEqual(tokenClaims["io.hull.asAccount"], { domain: "somedomain.com", external_id: "BggDBQ4EBAMBDQkLBAcCDA" }));
             const claims = jwt.decode(tReq.body.batch[0].headers["Hull-Access-Token"], null, true);
             assert(claims["io.hull.subjectType"] === "account");
             assert(tReq.body.batch[0].type === "traits");
