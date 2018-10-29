@@ -1,7 +1,7 @@
 {
   "name": "hull-segment",
   "description": "Install Segment in your site",
-  "version": "0.1.25",
+  "version": "0.1.26",
   "homepage": "https://github.com/hull-ships/hull-segment",
   "license": "MIT",
   "main": "dist/ship.js",
@@ -29,7 +29,7 @@
     "build:server": "./node_modules/.bin/babel server -d lib",
     "clean": "./node_modules/.bin/rimraf dist; ./node_modules/.bin/rimraf lib",
     "start": "node -r newrelic ./lib",
-    "start:dev": "./node_modules/.bin/nodemon -w server --exec ./node_modules/.bin/babel-node -- server",
+    "start:dev": "./node_modules/.bin/nodemon -w server --inspect --exec ./node_modules/.bin/babel-node -- server",
     "test": "npm run test:lint && npm run test:units",
     "test:lint": "eslint server",
     "test:modules": "npm outdated --depth=0",
@@ -68,7 +68,8 @@
     "raw-body": "^2.1.7",
     "rimraf": "^2.4.3",
     "webpack": "^1.13.1",
-    "webpack-dev-middleware": "^1.2.0"
+    "webpack-dev-middleware": "^1.2.0",
+    "yarn": "^1.6.0"
   },
   "devDependencies": {
     "babel-core": "^6.10.4",
