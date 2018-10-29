@@ -14,7 +14,7 @@ const server = require("../server/server");
 const { ContextMock } = require("./helper/connector-mock");
 
 
-const { track, identify, page, screen, userUpdateEventPayload } = require("./fixtures");
+const { track, identify, page, screen, userUpdateEventPayload, userBatchUpdateEventPayload } = require("./fixtures");
 
 // const API_RESPONSES = {
 //   default: {
@@ -439,12 +439,83 @@ describe("Segment Ship", () => {
   });
 
   describe("Outgoing User Update Messages", () => {
-    it("Event sent in User Update - Not in Segment", (done) => {
-      const ctxMock = new ContextMock();
-      ctxMock.ship = userUpdateEventPayload.connector;
-      ctxMock.connector = userUpdateEventPayload.connector;
+    // it("Event sent in User Update - Not in Segment", (done) => {
+    //   const ctxMock = new ContextMock();
+    //   ctxMock.ship = userUpdateEventPayload.connector;
+    //   ctxMock.connector = userUpdateEventPayload.connector;
+    //
+    //   const message = userUpdateEventPayload.messages[0];
+    //
+    //   const analytics = {
+    //     group: () => {},
+    //     enqueue: () => {},
+    //     page: () => {},
+    //     track: () => {},
+    //     identify: () => true,
+    //   };
+    //
+    //   sinon.spy(analytics, "group");
+    //   sinon.spy(analytics, "enqueue");
+    //   sinon.spy(analytics, "page");
+    //   sinon.spy(analytics, "track");
+    //   sinon.spy(analytics, "identify");
+    //
+    //   const analyticsClient = () => analytics;
+    //
+    //   const updateUserFunction = updateUser(analyticsClient);
+    //   const updatedAttributes = updateUserFunction(
+    //     {
+    //       message
+    //     },
+    //     {
+    //       ship: ctxMock.ship,
+    //       hull: ctxMock.client
+    //     }
+    //   );
+    //
+    //   const infoLogMock = ctxMock.client.logger.info;
+    //
+    //   // In this first scenario, the user is in the segment we're synchronizing
+    //   // But because there are no attribute updates, so we return false
+    //   // But in this case, it's an event incoming not an attribute, so we still get a successful outgoing event
+    //   assert(updatedAttributes === false);
+    //   assert(analytics.page.getCalls().length === 1);
+    //   assert(analytics.track.getCalls().length === 0);
+    //   assert(analytics.group.getCalls().length === 0);
+    //   assert(analytics.identify.getCalls().length === 0);
+    //   assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 1].args[0] === "outgoing.event.success");
+    //   assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 2].args[0] === "outgoing.user.skip");
+    //
+    //   ctxMock.ship.private_settings.synchronized_segments = ["notarealsegment"];
+    //
+    //   const updatedAttributes2 = updateUserFunction(
+    //     {
+    //       message
+    //     },
+    //     {
+    //       ship: ctxMock.ship,
+    //       hull: ctxMock.client
+    //     }
+    //   );
+    //
+    //   // In this second scenario, we set the synchronized segment to be different than the one the user is in
+    //   // We still get false because no attribute updates
+    //   // But now we also skip anything having to do with the user
+    //   assert(updatedAttributes2 === false);
+    //   assert(analytics.page.getCalls().length === 1);
+    //   assert(analytics.track.getCalls().length === 0);
+    //   assert(analytics.group.getCalls().length === 0);
+    //   assert(analytics.identify.getCalls().length === 0);
+    //   assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 1].args[0] === "outgoing.user.skip");
+    //   done();
+    // });
 
-      const message = userUpdateEventPayload.messages[0];
+    it("Event sent in User Update - Simulated batch call, no group", (done) => {
+      const ctxMock = new ContextMock();
+      ctxMock.ship = userBatchUpdateEventPayload.connector;
+      ctxMock.connector = userBatchUpdateEventPayload.connector;
+
+      const message = userBatchUpdateEventPayload.messages[0];
 
       const analytics = {
         group: () => {},
@@ -476,17 +547,21 @@ describe("Segment Ship", () => {
       const infoLogMock = ctxMock.client.logger.info;
 
       // In this first scenario, the user is in the segment we're synchronizing
-      // But because there are no attribute updates, so we return false
-      // But in this case, it's an event incoming not an attribute, so we still get a successful outgoing event
-      assert(updatedAttributes === false);
-      assert(analytics.page.getCalls().length === 1);
-      assert(analytics.track.getCalls().length === 0);
-      assert(analytics.group.getCalls().length === 0);
-      assert(analytics.identify.getCalls().length === 0);
-      assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 1].args[0] === "outgoing.event.success");
-      assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 2].args[0] === "outgoing.user.skip");
+      // We update a attribute that's in the synchronized properties
+      assert(updatedAttributes === true);
 
-      ctxMock.ship.private_settings.synchronized_segments = ["notarealsegment"];
+      // no events, so no page or track callse
+      assert(analytics.page.getCalls().length === 0);
+      assert(analytics.track.getCalls().length === 0);
+
+      // we call group because "ignoreFilters is false"
+      assert(analytics.group.getCalls().length === 1);
+      // we call identify because a user is incoming
+      assert(analytics.identify.getCalls().length === 1);
+
+      // both the user and account are successful
+      assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 1].args[0] === "outgoing.user.success");
+      assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 2].args[0] === "outgoing.account.success");
 
       const updatedAttributes2 = updateUserFunction(
         {
@@ -494,19 +569,32 @@ describe("Segment Ship", () => {
         },
         {
           ship: ctxMock.ship,
-          hull: ctxMock.client
+          hull: ctxMock.client,
+          ignoreFilters: true
         }
       );
 
-      // In this second scenario, we set the synchronized segment to be different than the one the user is in
-      // We still get false because no attribute updates
-      // But now we also skip anything having to do with the user
-      assert(updatedAttributes2 === false);
-      assert(analytics.page.getCalls().length === 1);
+      // again, we are synchronizing the same attribute out of the synchronized properties list
+      assert(updatedAttributes2 === true);
+
+      // no event, so no calls there
+      assert(analytics.page.getCalls().length === 0);
       assert(analytics.track.getCalls().length === 0);
-      assert(analytics.group.getCalls().length === 0);
-      assert(analytics.identify.getCalls().length === 0);
-      assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 1].args[0] === "outgoing.user.skip");
+
+      // this time we added the ignoreFilters=true, so there are no additional group calls
+      // because we do not call group because it's a batch call
+      assert(analytics.group.getCalls().length === 1);
+
+      // still call identify because the user is incoming
+      assert(analytics.identify.getCalls().length === 2);
+
+      // user gets updated
+      assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 1].args[0] === "outgoing.user.success");
+
+      // skipping account because no properties in account_synchronized_properties
+      // and no longer synchronizing segments anymore either...
+      assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 2].args[0] === "outgoing.account.skip");
+
       done();
     });
   });
