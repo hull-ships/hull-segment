@@ -92,6 +92,11 @@ export default function updateUserFactory(analyticsClient) {
       return false;
     }
 
+    /**
+     * ignoreFilters is a special boolean which is set on BATCH notifications
+     * for batch notifications we do NOT want to filter, which is why it is used
+     * in this case to bypass all the segment filtering
+     */
     if (!_.isEmpty(_.get(changes, "segments", {})) ||
         _.intersection(synchronized_properties, changedUserAttributes).length > 0 ||
         !_.isEmpty(_.get(changes, "account_segments", {})) ||
@@ -109,8 +114,14 @@ export default function updateUserFactory(analyticsClient) {
             }
             return group;
           }, {});
-          // Add account segments
-          _.set(groupTraits, "hull_segments", _.map(account_segments, "name"));
+
+          // ignoreFilters is checked in this case because of a limitation in the platform
+          // the platform doesn't send account segments for user updates
+          // So do not put it in, otherwise will blank out hull segment trait on the other side
+          if (!ignoreFilters) {
+            // Add account segments
+            _.set(groupTraits, "hull_segments", _.map(account_segments, "name"));
+          }
           if (!_.isEmpty(groupTraits)) {
             asUser.logger.info("outgoing.group.success", { groupId, traits: groupTraits, context });
             analytics.group({ groupId, anonymousId, userId, traits: groupTraits, context, integrations });
@@ -122,8 +133,12 @@ export default function updateUserFactory(analyticsClient) {
               props[prop.replace("/", "_")] = account[prop];
               return props;
             }, {});
-          // Add account segments
-          _.set(accountTraits, "hull_segments", _.map(account_segments, "name"));
+
+          // Please see comment above for why we only set this on !ignoreFilters
+          if (!ignoreFilters) {
+            // Add account segments
+            _.set(accountTraits, "hull_segments", _.map(account_segments, "name"));
+          }
 
           if (!_.isEmpty(accountTraits)) {
             hull.logger.debug("group.send", { groupId: accountId, traits: accountTraits, context });
