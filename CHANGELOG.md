@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.26
+
+- [hotfix] on batch user update, we should not add hull segments because the platform doesn't send the account segments currently, and sending an empty segment list overwrites the hull-segments in the target system
+
 ## v0.1.25
 
 - [hotfix] when domain is in the incoming traits, add it to the account identification as well, that way we're not just using the groupId to identify the account
