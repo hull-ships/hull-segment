@@ -8,13 +8,24 @@ import request from "supertest";
 import sinon from "sinon";
 import assert from "assert";
 import jwt from "jwt-simple";
+import nock from "nock";
+
 import updateUser from "../server/update-user";
 
 const server = require("../server/server");
 const { ContextMock } = require("./helper/connector-mock");
 
 
-const { track, identify, page, screen, userUpdateEventPayload, userBatchUpdateEventPayload } = require("./fixtures");
+const {
+  track,
+  identify,
+  page,
+  screen,
+  userUpdateEventPayload,
+  userBatchUpdateMockMessage,
+  userBatchUpdateRaw,
+  userBatchUpdatePayload
+} = require("./fixtures");
 
 // const API_RESPONSES = {
 //   default: {
@@ -47,15 +58,16 @@ const config = {
   ship: "56f3d53ef89a8791cb000004"
 };
 
-function sendRequest({ query, body, headers, metric }) {
+function sendRequest({ query, body, headers, metric, endpoint }) {
   const app = express();
   const connector = new Hull.Connector({
     hostSecret,
-    clientConfig: { protocol: "http", flushAt: 1, flushAfter: 1, firehoseUrl: "firehose" }
+    clientConfig: { protocol: "http", flushAt: 1, flushAfter: 1, firehoseUrl: "firehose" },
+    skipSignatureValidation: true
   });
   connector.setupApp(app);
   const client = request(server(app, { clientMiddleware: connector.clientMiddleware(), hostSecret, onMetric: metric, Hull }));
-  return client.post("/segment")
+  return client.post(endpoint || "/segment")
     .query(query || config)
     .set(headers || {})
     .type("json")
@@ -424,6 +436,36 @@ describe("Segment Ship", () => {
         });
     });
 
+    it("send update message to batch endpoint", (done) => {
+      // TODO nock the endpoint for batch url
+      nock("http://somefakewebsite.com")
+        .get("/getBatchPayload")
+        .reply(200, userBatchUpdatePayload);
+
+      // TODO nock the segment endpoint that we send to..
+      nock("https://api.segment.io")
+        .post("/v1/identify")
+        .reply(200);
+
+      shipData = {
+        settings: {}
+      };
+      sendRequest({
+        body: userBatchUpdateRaw,
+        endpoint: "/batch"
+        // headers: { "x-hull-smart-notifier": "true" }
+      })
+        .expect({ message: "thanks" })
+        .expect(200)
+        .end(() => {
+          setTimeout(() => {
+            console.log(`pending:  ${nock.pendingMocks()}`);
+            assert(nock.isDone());
+            done();
+          }, 10);
+        });
+    });
+
     describe("Collecting metric", () => {
       it("call metric collector", (done) => {
         const metricHandler = sinon.spy();
@@ -512,10 +554,10 @@ describe("Segment Ship", () => {
 
     it("Event sent in User Update - Simulated batch call, no group", (done) => {
       const ctxMock = new ContextMock();
-      ctxMock.ship = userBatchUpdateEventPayload.connector;
-      ctxMock.connector = userBatchUpdateEventPayload.connector;
+      ctxMock.ship = userBatchUpdateMockMessage.connector;
+      ctxMock.connector = userBatchUpdateMockMessage.connector;
 
-      const message = userBatchUpdateEventPayload.messages[0];
+      const message = userBatchUpdateMockMessage.messages[0];
 
       const analytics = {
         group: () => {},
