@@ -437,29 +437,48 @@ describe("Segment Ship", () => {
     });
 
     it("send update message to batch endpoint", (done) => {
-      // TODO nock the endpoint for batch url
+      // nock the endpoint for batch url
       nock("http://somefakewebsite.com")
         .get("/getBatchPayload")
         .reply(200, userBatchUpdatePayload);
 
-      // TODO nock the segment endpoint that we send to..
+      // Right now the mock batch isn't pulling in the hull_segments
+      // because the shipData isn't configured correctly
+      // the way we inject the shipData isn't quite right I think
+      const traits = {
+        hull_segments: [],
+        created_at: "2018-10-26T14:51:01Z"
+      };
+
+      // nock the segment endpoint that we send to..
       nock("https://api.segment.io")
-        .post("/v1/identify")
+        .post("/v1/batch", (body) => {
+          return body.batch.length === 1
+          && body.batch[0].type === "identify"
+          && body.batch[0].anonymousId === "outreach:16"
+          && _.isEqual(body.batch[0].traits, traits);
+        })
         .reply(200);
 
       shipData = {
-        settings: {}
+        id: "mockid",
+        settings: {
+          write_key: "fakekey",
+          handle_accounts: true
+        },
+        private_settings: {
+          synchronized_properties: [
+            "created_at"
+          ] }
       };
       sendRequest({
         body: userBatchUpdateRaw,
         endpoint: "/batch"
-        // headers: { "x-hull-smart-notifier": "true" }
       })
         .expect({ message: "thanks" })
         .expect(200)
         .end(() => {
           setTimeout(() => {
-            console.log(`pending:  ${nock.pendingMocks()}`);
             assert(nock.isDone());
             done();
           }, 10);
