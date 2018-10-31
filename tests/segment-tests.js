@@ -62,8 +62,7 @@ function sendRequest({ query, body, headers, metric, endpoint }) {
   const app = express();
   const connector = new Hull.Connector({
     hostSecret,
-    clientConfig: { protocol: "http", flushAt: 1, flushAfter: 1, firehoseUrl: "firehose" },
-    skipSignatureValidation: true
+    clientConfig: { protocol: "http", flushAt: 1, flushAfter: 1, firehoseUrl: "firehose" }
   });
   connector.setupApp(app);
   const client = request(server(app, { clientMiddleware: connector.clientMiddleware(), hostSecret, onMetric: metric, Hull }));
@@ -481,7 +480,7 @@ describe("Segment Ship", () => {
           setTimeout(() => {
             assert(nock.isDone());
             done();
-          }, 10);
+          }, 100);
         });
     });
 
