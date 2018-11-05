@@ -6,5 +6,7 @@ module.exports = {
   screen: require('./screen.json'),
   track: require('./track.json'),
   userUpdateEventPayload: require('./user-update-event-payload.json'),
-  userBatchUpdateEventPayload: require('./user-batchupdate-event-payload.json'),
+  userBatchUpdateMockMessage: require('./user-batchupdate-mock-message.json'),
+  userBatchUpdateRaw: require('./user-batchupdate-raw.json'),
+  userBatchUpdatePayload: require('./user-batchupdate-payload.json')
 };
