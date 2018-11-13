@@ -1,9 +1,9 @@
 {
     "notification_id": "cc156fd4-5150-4f1f-908f-63287beafe5d",
     "configuration": {
-        "id": "5bbb8592ec9ecaa580002cff",
-        "organization": "ad793dc7.hullapp.io",
-        "secret": "7640d59e15c5959e599ef437e3ba248d"
+        "id": "someconfigurationid",
+        "organization": "fakeorg.hullapp.io",
+        "secret": "somesecret"
     },
     "connector": {
         "tags": [],
