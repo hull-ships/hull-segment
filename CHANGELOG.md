@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.27
+
+- [hotfix] added new batch unit test to make sure we're hitting the batch endpoint and going through all the appropriate routing logic instead of just hitting the function directly
+
 ## v0.1.26
 
 - [hotfix] on batch user update, we should not add hull segments because the platform doesn't send the account segments currently, and sending an empty segment list overwrites the hull-segments in the target system
