@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.1.28
+
+- [hotfix] updated yarn lockfile with nock dependencies
+
+
 ## v0.1.27
 
 - [hotfix] added new batch unit test to make sure we're hitting the batch endpoint and going through all the appropriate routing logic instead of just hitting the function directly
