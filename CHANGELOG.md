@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.29
+
+- upgrade hull-node
+
 ## v0.1.28
 
 - [hotfix] updated yarn lockfile with nock dependencies
