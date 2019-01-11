@@ -17,7 +17,7 @@
     }
   ],
   "readme" : "readme.md",
-  "version": "0.1.29",
+  "version": "0.1.30",
   "deployment_settings":[
     {
       "name"       : "_selector",
@@ -41,7 +41,7 @@
     },
     {
       "name": "synchronized_segments",
-      "title": "Users to send",
+      "title": "User Filter",
       "description": "*By default all users are sent to Segment.com. If you specify segments, only those will be sent*",
       "type": "array",
       "format": "segment",

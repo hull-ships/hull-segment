@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.30
+
+- Update User filter settings title
+
 ## v0.1.29
 
 - upgrade hull-node
