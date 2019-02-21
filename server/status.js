@@ -27,13 +27,6 @@ export default function statusCheck(req, res) {
     );
   }
 
-  if (write_key && !_.size(synchronized_segments)) {
-    status = "warning";
-    messages.push(
-      "We have a write key but no segments are listed. Nothing will go out"
-    );
-  }
-
   if (
     write_key &&
     (!_.size(synchronized_properties) &&
@@ -42,7 +35,7 @@ export default function statusCheck(req, res) {
   ) {
     status = "warning";
     messages.push(
-      "We have a write key but no attributes and no events are listed. Nothing will go out."
+      "We have a write key but no attributes and no events are listed. Only ids and hull_segments are sent"
     );
   }
 
