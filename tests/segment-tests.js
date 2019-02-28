@@ -591,6 +591,29 @@ describe("Segment Ship", () => {
       assert(analytics.identify.getCalls().length === 0);
       assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 1].args[0] === "outgoing.event.success");
       assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 2].args[0] === "outgoing.user.skip");
+
+      ctxMock.ship.private_settings.synchronized_segments = [];
+
+      const updatedAttributes4 = updateUserFunction(
+        {
+          message
+        },
+        {
+          ship: ctxMock.ship,
+          hull: ctxMock.client
+        }
+      );
+
+      // In this fourth scenario, we set the synchronized segment to be empty
+      // The old pattern was if no segments are set, then we send everything
+      // not the case anymore
+      assert(updatedAttributes4 === false);
+      assert(analytics.page.getCalls().length === 2);
+      assert(analytics.track.getCalls().length === 0);
+      assert(analytics.group.getCalls().length === 0);
+      assert(analytics.identify.getCalls().length === 0);
+      assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 1].args[0] === "outgoing.user.skip");
+
       done();
     });
 

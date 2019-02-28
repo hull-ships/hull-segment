@@ -27,6 +27,14 @@ export default function statusCheck(req, res) {
     );
   }
 
+  // adding this back in, because now it is true.
+  if (write_key && !_.size(synchronized_segments)) {
+    status = "warning";
+    messages.push(
+      "We have a write key but no segments are listed. Nothing will go out"
+    );
+  }
+
   if (
     write_key &&
     (!_.size(synchronized_properties) &&
