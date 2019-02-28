@@ -29,9 +29,9 @@ The Hull Segment Connector allows your organization to send and receive data fro
 
 The Segment connector supports to `create users`, `add traits`, `update traits` and `create events`.
 
-## Specify the Users who are getting send to Segment
+## Specify the Users who are getting sent to Segment
 
-The Segment Connector sends and receives events for all users unless you restrict the Connector to send events only for users belonging to specific segments. This segment restriction does only have an effect for outbound data that is sent from Hull to Segment:
+The Segment Connector only sends users and their events which belong to specific segments. You can specify the groups of users that you want to send by filling in the "User Filter" setting.  If you want to send all users, you can select the "ALL" option from the "User Filter" setting.  This segment restriction only has an effect for outbound data that is sent from Hull to Segment:
 ![Whitelisted Segments](./docs/hullassource01.png)
 
 ## Determine the attributes to send to Segment (Hull as Source)
