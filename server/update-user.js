@@ -79,17 +79,21 @@ export default function updateUserFactory(analyticsClient) {
     const context = { active: false, ip: 0 };
     let ret = false;
 
-    // First check to see if the user is in a syncronized segments
-    // if it is not, there is no reason to keep going, just exit now...
     const segment_ids = _.map(segments, "id");
-    if (
-      !ignoreFilters &&
-      synchronized_segments.length > 0 && // Should we move to "Send no one by default ?"
-      //  -> good question, because if you don't have any syncronized segments seems like we update by default
-      !_.intersection(segment_ids, synchronized_segments).length
-      ) {
-      asUser.logger.info("outgoing.user.skip", { reason: "not matching any segment", segment_ids, traits });
-      return false;
+
+    // only potentially skip if we are NOT ignoring filters
+    // if we ARE ignoring filters, then don't skip ever
+    if (!ignoreFilters) {
+      // if this user does not belong to any of the synchronized segments
+      // then we want to skip
+      if (_.intersection(segment_ids, synchronized_segments).length === 0) {
+        // Finally check to see if any of the synchronized segments is the "ALL"
+        // if if it's not one of the segments, then skip it
+        if (_.indexOf(synchronized_segments, "ALL") < 0) {
+          asUser.logger.info("outgoing.user.skip", { reason: "not matching any segment", segment_ids, traits });
+          return false;
+        }
+      }
     }
 
     /**
