@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.31
+
+- Will not send all traffic by default unless customer as set the ALL option.  Migrating last customers to the option
+
 ## v0.1.30
 
 - Update User filter settings title

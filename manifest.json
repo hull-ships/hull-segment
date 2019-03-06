@@ -17,7 +17,7 @@
     }
   ],
   "readme" : "readme.md",
-  "version": "0.1.30",
+  "version": "0.1.31",
   "deployment_settings":[
     {
       "name"       : "_selector",
@@ -45,8 +45,10 @@
       "description": "*By default all users are sent to Segment.com. If you specify segments, only those will be sent*",
       "type": "array",
       "format": "segment",
-      "items": {
-        "type": "string"
+      "options": {
+        "standard": {
+          "ALL": "All Users"
+        }
       },
       "default": []
     },
