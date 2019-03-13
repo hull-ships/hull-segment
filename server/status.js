@@ -23,7 +23,7 @@ export default function statusCheck(req, res) {
   if (!write_key && _.size(synchronized_segments)) {
     status = "warning";
     messages.push(
-      "Some segments are listed but there's no write key. Can't send anything."
+      "An outgoing user segments are configured but there's no Segment.com write key. We can't send anything out. Please refer to connector documentation to see where to get write key from."
     );
   }
 
@@ -31,7 +31,7 @@ export default function statusCheck(req, res) {
   if (write_key && !_.size(synchronized_segments)) {
     status = "warning";
     messages.push(
-      "We have a write key but no segments are listed. Nothing will go out"
+      "A Segment.com write key is configured but no outgoing user segments are listed. We won’t send anything out. If you don’t want to do outgoing traffic with this connector remove the write key, otherwise please add some outgoing user segments."
     );
   }
 
@@ -52,42 +52,42 @@ export default function statusCheck(req, res) {
     !_.size(synchronized_properties) &&
     !_.size(synchronized_account_properties)
   ) {
-    status = "warning";
+    status = "ok";
     messages.push(
-      "Some segments are listed to send, but no properties are listed. Profiles will probably be incomplete"
+      "Some outgoing user segments are listed to send, but no properties are listed. Segment.com Profiles will probably be incomplete, please refer to connector settings to see how to setup outgoing properties."
     );
   }
 
   if (public_id_field !== "external_id") {
-    status = "warning";
+    status = "ok";
     messages.push(
       "You're not using `external_id` as the main identifier sent to Segment.com for a User. It works but it's usually an advanced option. Keep it in mind when debugging"
     );
   }
 
   if (ignore_segment_userId) {
-    status = "warning";
+    status = "ok";
     messages.push(
       "You are ignoring ALL User IDs coming from Segment for this connector. It's an advanced option. Keep this in mind"
     );
   }
 
   if (public_account_id_field !== "external_id") {
-    status = "warning";
+    status = "ok";
     messages.push(
       "You're not using `external_id` as the main identifier sent to Segment.com for an Account. It works but it's usually an advanced option. Keep it in mind when debugging"
     );
   }
 
   if (!handle_pages) {
-    status = "warning";
+    status = "ok";
     messages.push(
       "You have disabled support for collecting Page views. Keep in mind it will track incomplete profiles"
     );
   }
 
   if (!handle_accounts) {
-    status = "warning";
+    status = "ok";
     messages.push(
       "You have disabled support for Accounts coming In and Out of this connector. Keep this in mind when debugging"
     );
