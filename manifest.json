@@ -1,7 +1,7 @@
 {
   "name": "Segment",
   "description": "Complete control over your customer data with Hull and Segment",
-  "tags": ["incoming", "outgoing", "batch", "oneColumn", "smart-notifier"],
+  "tags": ["incoming", "outgoing", "batch", "oneColumn", "smart-notifier","first-install"],
   "index":"ship.js",
   "source": "segment",
   "logo": "logo.png",
@@ -17,7 +17,7 @@
     }
   ],
   "readme" : "readme.md",
-  "version": "0.1.31",
+  "version": "0.1.32",
   "deployment_settings":[
     {
       "name"       : "_selector",
