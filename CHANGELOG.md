@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.31
+
+- Updated status and messaging to more accurately reflect state
+
 ## v0.1.30
 
 - Update User filter settings title
