@@ -50,7 +50,7 @@ function processHandlers(handlers, { Hull, onMetric }) {
     }
 
     try {
-      const { client: hull, ship, token } = req.hull;
+      const { client: hull, ship } = req.hull;
       const { message } = req.segment;
 
       const metric = (metricName, value) => onMetric(metricName, value, ship || {});
