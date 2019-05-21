@@ -17,7 +17,7 @@
     }
   ],
   "readme" : "readme.md",
-  "version": "0.1.32",
+  "version": "0.1.33",
   "deployment_settings":[
     {
       "name"       : "_selector",
@@ -88,6 +88,12 @@
       "description" : "ONLY enable this feature when the Write Key is from a different workspace. Read the manual before making any changes; this can result in an endless loop of events.",
       "type" : "boolean",
       "default" : false
+    },
+    {
+      "name": "context_library",
+      "title": "Metadata Library",
+      "description": "By default the Segment connector uses the context metadata from `analytics-node` library. You can override it by passing a JSON object, for example if you want to use Python enter `{ \"name\": \"analytics-python\", \"version\": \"1.3.0b1\"}`",
+      "type": "string"
     }
   ],
   "settings": [

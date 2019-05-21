@@ -75,10 +75,25 @@ export default function updateUserFactory(analyticsClient) {
     const changedUserAttributes = _.keys(_.get(changes, "user", {}));
     const changedAccountAttributes = _.keys(_.get(changes, "account", {}));
 
+    const libraryOverride = _.get(ship, "private_settings.context_library", null);
+
     const integrations = { Hull: false };
     const context = { active: false, ip: 0 };
     let ret = false;
 
+    if (libraryOverride !== null) {
+      try {
+        const library = JSON.parse(libraryOverride);
+        if (!_.has(library, "name") || !_.has(library, "version")) {
+          hull.logger.debug("meta.library.invalid", "Library information is missing name or version.");
+        } else {
+          _.set(context, "library", library);
+        }
+      } catch (error) {
+        // We failed to parse the library info, so just move on with the default.
+        hull.logger.debug("meta.library.failed", JSON.stringify(error));
+      }
+    }
     const segment_ids = _.map(segments, "id");
 
     // only potentially skip if we are NOT ignoring filters
@@ -210,6 +225,10 @@ export default function updateUserFactory(analyticsClient) {
             active: true,
           }
         };
+
+        if (_.get(context, "library", null) !== null) {
+          _.set(track, "context.library", context.library);
+        }
 
         if (type === "page") {
           const p = { ...page, ...properties };
