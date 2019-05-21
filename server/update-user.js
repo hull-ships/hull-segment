@@ -87,7 +87,7 @@ export default function updateUserFactory(analyticsClient) {
         if (!_.has(library, "name") || !_.has(library, "version")) {
           hull.logger.debug("meta.library.invalid", "Library information is missing name or version.");
         } else {
-          _.set(context, 'library', library);
+          _.set(context, "library", library);
         }
       } catch (error) {
         // We failed to parse the library info, so just move on with the default.
