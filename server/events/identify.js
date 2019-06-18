@@ -84,21 +84,32 @@ export default function handleIdentify(payload, { hull, metric, ship }) {
     updating.then(
       ({ skip = false, traits: t = {} }) => {
         metric("request.identify.updateUser");
-        hull
+
+        const scopedClient = hull
           .asUser({
             email: t.email,
-            externald_id: userId,
+            external_id: userId,
             anonymous_id: anonymousId
-          })
-          .logger.info(`incoming.user.${skip ? "skip" : "success"}`, {
-            payload,
-            traits: t
           });
+
+        scopedClient.logger.info(`incoming.user.${skip ? "skip" : "success"}`, {
+          payload,
+          traits: t
+        });
+
+        try {
+          const topLevelEmail = payload.email;
+          if (topLevelEmail) {
+            scopedClient.logger.debug(`Contains a top level email in identify call: ${topLevelEmail}`);
+          }
+        } catch (error) {
+          console.log(`Error logging toplevel email ${payload.email}`);
+        }
       },
       (error) => {
         metric("request.identify.updateUser.error");
         hull
-          .asUser({ externald_id: userId, anonymous_id: anonymousId })
+          .asUser({ external_id: userId, anonymous_id: anonymousId })
           .logger.error("incoming.user.error", { payload, errors: error });
       }
     );

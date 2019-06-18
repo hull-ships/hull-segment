@@ -50,7 +50,7 @@ function processHandlers(handlers, { Hull, onMetric }) {
     }
 
     try {
-      const { client: hull, ship, token } = req.hull;
+      const { client: hull, ship } = req.hull;
       const { message } = req.segment;
 
       const metric = (metricName, value) => onMetric(metricName, value, ship || {});
@@ -59,9 +59,9 @@ function processHandlers(handlers, { Hull, onMetric }) {
       const eventHandlers = handlers[eventName];
 
       if (hull) {
-        hull.logger.debug(`incoming.${eventName}.start`, { message, token });
+        hull.logger.debug(`incoming.${eventName}.start`, { message });
       } else {
-        Hull.logger.debug(`incoming.${eventName}.start`, { message, token });
+        Hull.logger.debug(`incoming.${eventName}.start`, { message });
       }
 
       metric(`request.${eventName}`, 1);
