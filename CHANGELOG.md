@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.35
+
+- Updated ES query for legacy groups support
+
 ## v0.1.34
 
 - New Settings
