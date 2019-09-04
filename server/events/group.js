@@ -55,8 +55,7 @@ export class GroupBatchHandler {
   searchUsers(groupIds) {
     const params = {
       query: {
-        filtered: {
-          query: { match_all: {} },
+        bool: {
           filter: {
             terms: { "traits_group/id": groupIds }
           }

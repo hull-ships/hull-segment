@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v0.1.35
+
+- Updated ES query for legacy groups support
+
+## v0.1.34
+
+- New Settings
+
 ## v0.1.33
 
 - Enable override of default metadata for library used to send events to segment.com
