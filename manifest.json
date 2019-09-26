@@ -43,7 +43,7 @@
     {
       "name": "synchronized_segments",
       "title": "User Filter",
-      "description": "*By default all users are sent to Segment.com. If you specify segments, only those will be sent*. ",
+      "description": "Global filter. Only send if user matches one of these segments",
       "type": "array",
       "format": "segment",
       "options": {
