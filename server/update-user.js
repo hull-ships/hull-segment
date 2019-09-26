@@ -68,7 +68,7 @@ export default function updateUserFactory(analyticsClient) {
 
     // We have no identifier for the user, we have to skip
     if (!userId && !anonymousId) {
-      asUser.logger.info("outgoing.user.skip", { reason: "No Identifier (userId or anonymousId)", traits });
+      asUser.logger.debug("outgoing.user.skip", { reason: "No Identifier (userId or anonymousId)", traits });
       return false;
     }
 
@@ -105,7 +105,7 @@ export default function updateUserFactory(analyticsClient) {
         // Finally check to see if any of the synchronized segments is the "ALL"
         // if if it's not one of the segments, then skip it
         if (_.indexOf(synchronized_segments, "ALL") < 0) {
-          asUser.logger.info("outgoing.user.skip", { reason: "not matching any segment", segment_ids, traits });
+          asUser.logger.debug("outgoing.user.skip", { reason: "not matching any segment", segment_ids, traits });
           return false;
         }
       }
@@ -183,7 +183,7 @@ export default function updateUserFactory(analyticsClient) {
       ret = analytics.identify({ anonymousId, userId, traits, context, integrations });
       asUser.logger.info("outgoing.user.success", { userId, traits });
     } else {
-      asUser.logger.info("outgoing.user.skip", { reason: "No changes detected that would require a synchronization to segment.com" });
+      asUser.logger.debug("outgoing.user.skip", { reason: "No changes detected that would require a synchronization to segment.com" });
       ret = false;
     }
 
