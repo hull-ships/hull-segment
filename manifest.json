@@ -213,9 +213,17 @@
       ]
     }
   ],
-  "subscriptions": [
+  "subscriptions" : [
     {
-      "url": "/smart-notify"
+      "url" : "/smart-notify",
+      "conditions": {
+        "channels": { "only": [ "user:update" ] },
+        "segments": {
+          "user:update": [
+            "private_settings.synchronized_segments"
+          ]
+        }
+      }
     }
   ]
 }
