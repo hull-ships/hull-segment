@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.36
+
+- Add kraken filtering
+
 ## v0.1.35
 
 - Updated ES query for legacy groups support
