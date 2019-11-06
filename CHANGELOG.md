@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.37
+
+- Move outgoing.user.skip & outgoing.account.skip logs to debug level
+
 ## v0.1.36
 
 - Add kraken filtering

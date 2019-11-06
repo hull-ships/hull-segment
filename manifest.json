@@ -24,7 +24,7 @@
     }
   ],
   "readme": "readme.md",
-  "version": "0.1.36",
+  "version": "0.1.37",
   "deployment_settings": [
     {
       "name": "_selector",
