@@ -68,7 +68,7 @@ export default function updateUserFactory(analyticsClient) {
 
     // We have no identifier for the user, we have to skip
     if (!userId && !anonymousId) {
-      asUser.logger.info("outgoing.user.skip", { reason: "No Identifier (userId or anonymousId)", traits });
+      asUser.logger.debug("outgoing.user.skip", { reason: "No Identifier (userId or anonymousId)", traits });
       return false;
     }
 
@@ -105,7 +105,7 @@ export default function updateUserFactory(analyticsClient) {
         // Finally check to see if any of the synchronized segments is the "ALL"
         // if if it's not one of the segments, then skip it
         if (_.indexOf(synchronized_segments, "ALL") < 0) {
-          asUser.logger.info("outgoing.user.skip", { reason: "not matching any segment", segment_ids, traits });
+          asUser.logger.debug("outgoing.user.skip", { reason: "not matching any segment", segment_ids, traits });
           return false;
         }
       }
@@ -164,10 +164,10 @@ export default function updateUserFactory(analyticsClient) {
             analytics.group({ groupId: accountId, anonymousId, userId, traits: accountTraits, context, integrations });
             asUser.account().logger.info("outgoing.account.success", { groupId: accountId, traits: accountTraits, context });
           } else {
-            asUser.account().logger.info("outgoing.account.skip", { reason: "Empty traits payload", groupId: accountId, traits: accountTraits, context });
+            asUser.account().logger.debug("outgoing.account.skip", { reason: "Empty traits payload", groupId: accountId, traits: accountTraits, context });
           }
         } else {
-          asUser.account().logger.info("outgoing.account.skip", {
+          asUser.account().logger.debug("outgoing.account.skip", {
             reason: "doesn't match rules for sending",
             handle_groups,
             handle_accounts,
@@ -183,7 +183,7 @@ export default function updateUserFactory(analyticsClient) {
       ret = analytics.identify({ anonymousId, userId, traits, context, integrations });
       asUser.logger.info("outgoing.user.success", { userId, traits });
     } else {
-      asUser.logger.info("outgoing.user.skip", { reason: "No changes detected that would require a synchronization to segment.com" });
+      asUser.logger.debug("outgoing.user.skip", { reason: "No changes detected that would require a synchronization to segment.com" });
       ret = false;
     }
 
@@ -192,11 +192,11 @@ export default function updateUserFactory(analyticsClient) {
       events.map((e) => {
         // Don't forward events of source "segment" when forwarding disabled.
         if (e.event_source === "segment" && !forward_events) {
-          asUser.logger.info("outgoing.event.skip", { reason: "Segment event without forwarding", event: e.event });
+          asUser.logger.debug("outgoing.event.skip", { reason: "Segment event without forwarding", event: e.event });
           return true;
         }
         if (send_events && send_events.length && !_.includes(send_events, e.event)) {
-          asUser.logger.info("outgoing.event.skip", { reason: "not included in event list", event: e.event });
+          asUser.logger.debug("outgoing.event.skip", { reason: "not included in event list", event: e.event });
           return true;
         }
 
