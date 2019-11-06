@@ -534,6 +534,7 @@ describe("Segment Ship", () => {
       );
 
       const infoLogMock = ctxMock.client.logger.info;
+      const debugLogMock = ctxMock.client.logger.debug;
 
       // In this first scenario, the user is in the segment we're synchronizing
       // But because there are no attribute updates, so we return false
@@ -544,7 +545,7 @@ describe("Segment Ship", () => {
       assert(analytics.group.getCalls().length === 0);
       assert(analytics.identify.getCalls().length === 0);
       assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 1].args[0] === "outgoing.event.success");
-      assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 2].args[0] === "outgoing.user.skip");
+      assert(debugLogMock.getCalls()[infoLogMock.getCalls().length - 1].args[0] === "outgoing.user.skip");
 
       ctxMock.ship.private_settings.synchronized_segments = ["notarealsegment"];
 
@@ -566,7 +567,7 @@ describe("Segment Ship", () => {
       assert(analytics.track.getCalls().length === 0);
       assert(analytics.group.getCalls().length === 0);
       assert(analytics.identify.getCalls().length === 0);
-      assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 1].args[0] === "outgoing.user.skip");
+      assert(debugLogMock.getCalls()[infoLogMock.getCalls().length - 1].args[0] === "outgoing.user.skip");
 
       ctxMock.ship.private_settings.synchronized_segments = ["ALL"];
 
@@ -590,7 +591,7 @@ describe("Segment Ship", () => {
       assert(analytics.group.getCalls().length === 0);
       assert(analytics.identify.getCalls().length === 0);
       assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 1].args[0] === "outgoing.event.success");
-      assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 2].args[0] === "outgoing.user.skip");
+      assert(debugLogMock.getCalls()[infoLogMock.getCalls().length - 2].args[0] === "outgoing.user.skip");
 
       ctxMock.ship.private_settings.synchronized_segments = [];
 
@@ -612,7 +613,7 @@ describe("Segment Ship", () => {
       assert(analytics.track.getCalls().length === 0);
       assert(analytics.group.getCalls().length === 0);
       assert(analytics.identify.getCalls().length === 0);
-      assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 1].args[0] === "outgoing.user.skip");
+      assert(debugLogMock.getCalls()[infoLogMock.getCalls().length - 1].args[0] === "outgoing.user.skip");
 
       done();
     });
@@ -652,6 +653,7 @@ describe("Segment Ship", () => {
       );
 
       const infoLogMock = ctxMock.client.logger.info;
+      const debugLogMock = ctxMock.client.logger.debug;
 
       // In this first scenario, the user is in the segment we're synchronizing
       // We update a attribute that's in the synchronized properties
@@ -700,7 +702,7 @@ describe("Segment Ship", () => {
 
       // skipping account because no properties in account_synchronized_properties
       // and no longer synchronizing segments anymore either...
-      assert(infoLogMock.getCalls()[infoLogMock.getCalls().length - 2].args[0] === "outgoing.account.skip");
+      assert(debugLogMock.getCalls()[debugLogMock.getCalls().length - 1].args[0] === "outgoing.account.skip");
 
       done();
     });
