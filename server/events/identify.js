@@ -28,7 +28,7 @@ function updateUser(hull, user, shipSettings, active) {
 
     if (shipSettings.ignore_segment_userId === true && !email && !anonymousId) {
       const logPayload = { id: user.id, anonymousId, email };
-      asUser.logger.info("incoming.user.skip", {
+      asUser.logger.debug("incoming.user.skip", {
         reason:
           "No email address or anonymous ID present when ignoring segment's user ID.",
         logPayload
@@ -36,7 +36,7 @@ function updateUser(hull, user, shipSettings, active) {
       return Promise.resolve({ skip: true });
     } else if (!userId && !anonymousId) {
       const logPayload = { id: user.id, userId, anonymousId };
-      asUser.logger.info("incoming.user.skip", {
+      asUser.logger.debug("incoming.user.skip", {
         reason: "No user ID or anonymous ID present.",
         logPayload
       });
@@ -92,7 +92,7 @@ export default function handleIdentify(payload, { hull, metric, ship }) {
             anonymous_id: anonymousId
           });
 
-        scopedClient.logger.info(`incoming.user.${skip ? "skip" : "success"}`, {
+        scopedClient.logger.debug(`incoming.user.${skip ? "skip" : "success"}`, {
           payload,
           traits: t
         });

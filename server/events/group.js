@@ -134,7 +134,7 @@ export class GroupBatchHandler {
       const asUser = this.hull.asUser(user.id);
       return asUser.traits(diff).then(
         () => {
-          asUser.logger.info("incoming.group.success", user);
+          asUser.logger.debug("incoming.group.success", user);
           return { as: user.id, traits: diff };
         },
         error => asUser.logger.error("incoming.group.error", { errors: error })
@@ -233,7 +233,7 @@ function handleGroupNew(event, { hull }) {
     }
 
     try {
-      scopedClient.logger.info("incoming.account.success", { payload: event });
+      scopedClient.logger.debug("incoming.account.success", { payload: event });
     } catch (e) {
       console.log("LOGGER ERROR");
       console.log(e);
