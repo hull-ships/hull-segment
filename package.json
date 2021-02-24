@@ -67,8 +67,8 @@
     "newrelic": "^7.1.1",
     "raw-body": "^2.4.1",
     "rimraf": "^2.7.1",
-    "webpack": "^1.15.0",
-    "webpack-dev-middleware": "^1.12.2"
+    "webpack": "^3.12",
+    "webpack-dev-middleware": "^2.0.6"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",

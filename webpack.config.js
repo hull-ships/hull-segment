@@ -22,7 +22,7 @@ module.exports = {
     })
   ],
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.js?$/,
         exclude: /node_modules/,
@@ -30,7 +30,7 @@ module.exports = {
           path.resolve(__dirname, "test"),
           path.resolve(__dirname, "src")
         ],
-        loader: "babel"
+        loader: "babel-loader"
       }
     ]
   }
