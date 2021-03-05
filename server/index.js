@@ -15,10 +15,7 @@ const options = {
   Hull,
   hostSecret: process.env.SECRET || "1234",
   port: process.env.PORT || 8082,
-  devMode: process.env.NODE_ENV === "development",
-  onMetric: function onMetric(metric, value, ctx) {
-    console.log(`[${ctx.id}] segment.${metric}`, value);
-  }
+  devMode: process.env.NODE_ENV === "development"
 };
 
 
