@@ -56,7 +56,7 @@
     "camelize": "^1.0.0",
     "connect": "^3.4.1",
     "ejs": "^2.4.2",
-    "express": "^4.14.0",
+    "express": "^4.17.3",
     "hull": "0.13.21",
     "hull-connector-tester": "^0.0.4",
     "json-loader": "^0.5.3",
